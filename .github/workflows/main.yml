@@ -1,0 +1,31 @@
+name: .NET
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+    - name: Restore dependencies
+      run: |
+        dotnet restore ./QuizCraft.Domain.API
+        dotnet restore ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit
+        dotnet restore ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration
+    - name: Build
+      run: |
+        dotnet build ./QuizCraft.Domain.API --no-restore
+        dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --no-restore
+        dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --no-restore
+    - name: Test
+      run: |
+        dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --no-build --verbosity normal
+        dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --no-build --verbosity normal
