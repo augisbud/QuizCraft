@@ -19,7 +19,7 @@ jobs:
         dotnet-version: 8.0.x
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
+    - name: Build Project
       run: dotnet build ./QuizCraft.Domain.API ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --no-restore
     - name: Test
       run: dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --no-build --verbosity normal
