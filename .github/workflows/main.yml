@@ -51,8 +51,8 @@ jobs:
 
     - name: Build Docker image
       run: |
-        docker build -t ghcr.io/${{ github.repository }}/quizcraft:latest ./QuizCraft.Domain.API
+        docker build -t ghcr.io/${{ github.repository.toLowerCase() }}/quizcraft:latest ./QuizCraft.Domain.API
 
     - name: Push Docker image
       run: |
-        docker push ghcr.io/${{ github.repository }}/quizcraft:latest
+        docker push ghcr.io/${{ github.repository.toLowerCase() }}/quizcraft:latest
