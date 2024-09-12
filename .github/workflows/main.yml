@@ -1,7 +1,6 @@
 name: .NET CI/CD
 
 permissions:
-  contents: write
   packages: write
 
 on:
