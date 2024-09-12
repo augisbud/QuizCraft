@@ -26,14 +26,14 @@ jobs:
 
     - name: Build
       run: |
-        dotnet build ./QuizCraft.Domain.API --no-restore
-        dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --no-restore
-        dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --no-restore
+        dotnet build ./QuizCraft.Domain.API --configuration Release --no-restore
+        dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-restore
+        dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-restore
 
     - name: Test
       run: |
-        dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --no-build --verbosity normal
-        dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --no-build --verbosity normal
+        dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-build --verbosity normal
+        dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-build --verbosity normal
 
     - name: Publish
       run: |
