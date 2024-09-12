@@ -1,5 +1,7 @@
 # QuizCraft
 
+This solution allows users to upload a summary of a given topic, whether it is a university or work assignment, and receive multiple-choice questions based on that summary to practice their knowledge and be evaluated on matters related to that topic.
+
 ### Team Members
 - Augustas Budnikas
 - Ignė Balvočiūtė
