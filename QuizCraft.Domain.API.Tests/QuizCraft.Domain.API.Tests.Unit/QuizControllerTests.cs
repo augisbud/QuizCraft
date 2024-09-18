@@ -1,23 +1,46 @@
 using Microsoft.AspNetCore.Mvc;
+using Moq;
 using QuizCraft.Domain.API.Controllers;
+using QuizCraft.Domain.API.Models;
+using QuizCraft.Domain.API.Services;
 
 namespace QuizCraft.Domain.API.Tests.Unit;
 
 public class QuizControllerTests
 {
-    private readonly QuizController _controller = new();
+    private readonly Mock<IQuizService> _quizService = new();
+    private readonly QuizController _controller;
+    
+    public QuizControllerTests()
+    {
+        _controller = new(_quizService.Object);
+    }
 
     [Fact]
-    public void GetQuizes_ReturnsExpected()
+    public async void GetQuizes_ReturnsExpected()
     {
+        // Arrange
+        var expectedOutput = new QuestionDto()
+        {
+            Text = "What is the capital of France?",
+            Answers = [
+                new()
+                {
+                    Text = "Paris"
+                },
+            ]
+        };
+
+        _quizService
+            .Setup(x => x.GenerateQuiz())
+            .ReturnsAsync(expectedOutput);
+
         // Act
-        var response = _controller.GetQuizes();
+        var response = await _controller.GetQuizes();
 
         // Assert
-        var result = Assert.IsType<OkObjectResult>(response);
-        var data = Assert.IsAssignableFrom<List<string>>(result.Value);
-        Assert.Equal(2, data.Count);
-        Assert.Equal("Quiz 1", data[0]);
-        Assert.Equal("Quiz 2", data[1]);
+        var result = Assert.IsType<OkObjectResult>(response.Result);
+        var data = Assert.IsAssignableFrom<QuestionDto>(result.Value);
+        Assert.Equal(expectedOutput, data);
     }
 }
