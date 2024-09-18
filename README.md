@@ -21,7 +21,9 @@ This solution allows users to upload a summary of a given topic, whether it is a
 - Docker
 
 ### Deployment on a Local Machine
-Checkout the Github Repository, then run the following commands
+Checkout the Github Repository
+Set Gemini API key as an Environment Variable in your machine using the given key: GeminiAPIKey
+Then run the following commands
 Using .NET 8 SDK:
 ```
 cd QuizCraft.Domain.API
@@ -31,6 +33,7 @@ dotnet run
 or using Docker
 ```
 cd QuizCraft.Domain.API
+dotnet publish -c Release
 docker build -t quicraft:latest .
 docker run -p 8080:8080 quizcraft:latest
 ```
