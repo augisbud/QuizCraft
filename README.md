@@ -17,7 +17,7 @@ This solution allows users to upload a summary of a given topic, whether it is a
 - C#
 - Entity Framework Core
 - PostgreSQL
-- OpenAI API
+- Gemini API
 - Docker
 
 ### Deployment on a Local Machine
@@ -80,3 +80,7 @@ The project utilizes the following key components and database tables:
 ### Use-case Diagram
 
 ![Alt text](./images/use_case_diagram.png)
+
+### Activity Diagram
+
+![Alt text](./images/activity_diagram.png)
