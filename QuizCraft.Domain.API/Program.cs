@@ -6,13 +6,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAllOrigins",
-        builder =>
-        {
-            builder.AllowAnyOrigin()
-                   .AllowAnyMethod()
-                   .AllowAnyHeader();
-        });
+    options.AddPolicy("AllowLocalhost",
+    builder =>
+    {
+        builder.WithOrigins("http://localhost:3001")
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+
 });
 
 builder.Services.AddControllers();
@@ -38,7 +39,7 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 
 var app = builder.Build();
 
-app.UseCors("AllowAllOrigins");
+app.UseCors("AllowLocalhost");
 
 app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuizCraft API v1"));

@@ -1,6 +1,7 @@
-import React, { useState, ChangeEvent, FormEvent } from 'react';
+import { useState, ChangeEvent, FormEvent } from 'react';
+import styles from './App.module.scss';
 
-function App() {
+export const App = () => {
     // Update state to specify that file can be `File` or `null`
     const [file, setFile] = useState<File | null>(null);
 
@@ -42,11 +43,11 @@ function App() {
     };
 
     return (
-        <div>
-            <h1>Upload a File</h1>
+        <div className={styles.wrapper}>
+            <h1 className={styles.title}>Upload a File</h1>
             <form onSubmit={handleSubmit}>
                 <input type="file" onChange={handleFileChange} />
-                <button type="submit">Upload</button>
+                <button className={styles.button} type="submit">Upload</button>
             </form>
         </div>
     );
