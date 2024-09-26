@@ -9,8 +9,8 @@ public class QuizController(IQuizService quizService) : ControllerBase
 {
     [HttpGet]
     [Route("/quizes")]
-    public async Task<ActionResult<QuestionDto>> GetQuizes()
+    public async Task<ActionResult<QuestionDto>> GetQuizes(string topic)
     {      
-        return Ok(await quizService.GenerateQuiz());
+        return Ok(await quizService.GenerateQuiz(topic));
     }
 }
