@@ -70,7 +70,7 @@ public class QuizServiceTests
             .ReturnsAsync(responseContent);
 
         // Act
-        var result = await _quizService.GenerateQuiz();
+        var result = await _quizService.GenerateQuiz("cities");
 
         // Assert
         Assert.Equal(expectedOutput.Text, result.Text);

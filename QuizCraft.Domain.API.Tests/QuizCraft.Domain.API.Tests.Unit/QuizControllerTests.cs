@@ -32,11 +32,11 @@ public class QuizControllerTests
         };
 
         _quizService
-            .Setup(x => x.GenerateQuiz())
+            .Setup(x => x.GenerateQuiz("cities"))
             .ReturnsAsync(expectedOutput);
 
         // Act
-        var response = await _controller.GetQuizes();
+        var response = await _controller.GetQuizes("cities");
 
         // Assert
         var result = Assert.IsType<OkObjectResult>(response.Result);

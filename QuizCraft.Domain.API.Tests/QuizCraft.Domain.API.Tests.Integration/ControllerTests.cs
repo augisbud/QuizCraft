@@ -14,7 +14,7 @@ public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<Con
         var client = fixture.Factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/quizes");
+        var response = await client.GetAsync("/quizes?topic=cities");
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
