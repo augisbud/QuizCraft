@@ -18,8 +18,8 @@ public class FileUploadController(IFileProcessingService fileProcessingService) 
 
         Console.WriteLine($"Uploaded file extension: {fileExtension}");
 
-        if (fileExtension != ".txt" && fileExtension != ".doc" && fileExtension != ".docx" && fileExtension != ".pdf")
-            return BadRequest("Invalid file type. Only .txt, .doc, .docx and .pdf files are allowed.");
+        if (fileExtension != ".txt" && fileExtension != ".docx" && fileExtension != ".pdf")
+            return BadRequest("Invalid file type. Only .txt, .docx and .pdf files are allowed.");
 
         //calling file processing
         var result = await fileProcessingService.ProcessFileAsync(file);
