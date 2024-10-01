@@ -59,3 +59,21 @@ jobs:
     - name: Push Docker image
       run: |
         docker push ghcr.io/augisbud/quizcraft/backend:latest
+  CD:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to Remote Server
+        uses: appleboy/ssh-action@v0.1.4
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs:
+            DOCKER_IMAGE: ghcr.io/augisbud/quizcraft/backend:latest
+          script: |
+            docker pull $DOCKER_IMAGE
+            docker stop backend || true
+            docker rm backend || true
+            docker run -d --name backend -p 8080:8080 $DOCKER_IMAGE
