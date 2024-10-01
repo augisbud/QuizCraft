@@ -73,24 +73,8 @@ jobs:
           username: ${{ secrets.VPN_USERNAME }}
           password: ${{ secrets.VPN_PASSWORD }}
 
-      - name: Setup SSH
-        run: |
-          # Create the SSH directory if it doesn't exist
-          mkdir -p $HOME/.ssh
-          # Output the SSH private key to a file
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > $HOME/.ssh/id_rsa
-          # Set appropriate permissions for the private key
-          chmod 600 $HOME/.ssh/id_rsa
-
-      - name: Verify SSH Configuration
-        run: |
-          echo "Using SSH Host: ${{ secrets.SSH_HOST }}"
-          echo "Using SSH Port: ${{ secrets.SSH_PORT }}"
-          # Test SSH connection
-          ssh -i $HOME/.ssh/id_rsa -o StrictHostKeyChecking=no -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "echo 'SSH Connection Successful'" || echo "SSH Connection Failed"
-      
       - name: Deploy to Remote Server
-        uses: appleboy/ssh-action@v0.1.4
+        uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SSH_HOST }}
           port: ${{ secrets.SSH_PORT }}
