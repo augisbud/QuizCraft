@@ -66,7 +66,7 @@ jobs:
 
     steps:
       - name: Connect to VPN
-        uses: mizumotok/l2tp-ipsec-action@v1
+        uses: mizumotok/l2tp-ipsec-action@master
         with:
           pre-shared-key: ${{ secrets.VPN_PSK }}
           ip-address: ${{ secrets.VPN_IPADDRESS }}
