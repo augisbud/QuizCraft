@@ -68,13 +68,12 @@ jobs:
       - name: Connect to VPN
         uses: matcontardo/setup-vpn-client-meraki@1.5
         with:
-          
           server: ${{ secrets.VPN_IPADDRESS }}
           psk: ${{ secrets.VPN_PSK }}
           username: ${{ secrets.VPN_USERNAME }}
           password: ${{ secrets.VPN_PASSWORD }}
-          network_route: '193.219.91.103/32'
-          test_ip: '193.219.91.103'
+          network_route: '0.0.0.0/8'
+          test_ip: '1.1.10.1'
 
       - name: Verify SSH Configuration
         run: |
