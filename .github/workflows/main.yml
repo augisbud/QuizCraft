@@ -66,12 +66,15 @@ jobs:
 
     steps:
       - name: Connect to VPN
-        uses: mizumotok/l2tp-ipsec-action@master
+        uses: matcontardo/setup-vpn-client-meraki@v1.5
         with:
-          pre-shared-key: ${{ secrets.VPN_PSK }}
-          ip-address: ${{ secrets.VPN_IPADDRESS }}
+          
+          server: ${{ secrets.VPN_IPADDRESS }}
+          psk: ${{ secrets.VPN_PSK }}
           username: ${{ secrets.VPN_USERNAME }}
           password: ${{ secrets.VPN_PASSWORD }}
+          network_route: '193.219.91.103/32'
+          test_ip: '193.219.91.103'
 
       - name: Verify SSH Configuration
         run: |
