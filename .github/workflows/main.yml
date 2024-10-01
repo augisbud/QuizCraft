@@ -63,7 +63,7 @@ jobs:
   CD:
     runs-on: ubuntu-latest
     needs: CI
-
+    
     steps:
       - name: Deploy to Remote Server
         uses: appleboy/ssh-action@v0.1.4
@@ -72,8 +72,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs:
-            DOCKER_IMAGE: ghcr.io/augisbud/quizcraft/backend:latest
+          envs: |
+            DOCKER_IMAGE=ghcr.io/augisbud/quizcraft/backend:latest
           script: |
             docker pull $DOCKER_IMAGE
             docker stop backend || true
