@@ -72,10 +72,8 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          envs: |
-            DOCKER_IMAGE=ghcr.io/augisbud/quizcraft/backend:latest
           script: |
-            docker pull $DOCKER_IMAGE
+            docker pull ghcr.io/augisbud/quizcraft/backend:latest
             docker stop backend || true
             docker rm backend || true
-            docker run -d --name backend -p 8080:8080 $DOCKER_IMAGE
+            docker run -d --name backend -p 8080:8080 ghcr.io/augisbud/quizcraft/backend:latest
