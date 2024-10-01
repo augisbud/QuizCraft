@@ -65,14 +65,6 @@ jobs:
     needs: CI
 
     steps:
-      - name: Connect to VPN
-        uses: mizumotok/l2tp-ipsec-action@master
-        with:
-          pre-shared-key: ${{ secrets.VPN_PSK }}
-          ip-address: ${{ secrets.VPN_IPADDRESS }}
-          username: ${{ secrets.VPN_USERNAME }}
-          password: ${{ secrets.VPN_PASSWORD }}
-
       - name: Deploy to Remote Server
         uses: appleboy/ssh-action@v1.0.3
         with:
