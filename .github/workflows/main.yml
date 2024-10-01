@@ -65,6 +65,14 @@ jobs:
     needs: CI
 
     steps:
+      - name: Connect to VPN
+        uses: mizumotok/l2tp-ipsec-action@v1
+        with:
+          pre-shared-key: ${{ secrets.VPN_PSK }}
+          ip-address: ${{ secrets.VPN_IPADDRESS }}
+          username: ${{ secrets.VPN_USERNAME }}
+          password: ${{ secrets.VPN_PASSWORD }}
+
       - name: Verify SSH Configuration
         run: |
           echo "Using SSH Host: ${{ secrets.SSH_HOST }}"
