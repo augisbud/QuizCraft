@@ -1,6 +1,11 @@
 using QuizCraft.Domain.API.APIClients;
 using QuizCraft.Domain.API.Services;
 using Microsoft.OpenApi.Models;
+using Microsoft.EntityFrameworkCore;
+using QuizCraft.Domain.API.Data;
+using QuizCraft.Domain.API.Repositories;
+using QuizCraft.Domain.API.Profiles;
+using AutoMapper.EquivalencyExpression;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -29,12 +34,25 @@ builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
 
 builder.Services.AddHealthChecks();
 
+builder.Services.AddDbContext<QuizzesDbContext>(options =>
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+
 builder.Services.AddHttpClient<IGeminiAPIClient, GeminiAPIClient>(
     client =>
     {
         client.BaseAddress = new Uri("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent");
     }
 );
+
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<QuizzesProfiles>();
+    cfg.AddCollectionMappers();
+});
+
 builder.Services.AddScoped<IQuizService, QuizService>();
 
 var app = builder.Build();

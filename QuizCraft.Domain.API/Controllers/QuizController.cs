@@ -7,10 +7,10 @@ namespace QuizCraft.Domain.API.Controllers;
 [ApiController]
 public class QuizController(IQuizService quizService) : ControllerBase
 {
-    [HttpGet]
+    [HttpPost]
     [Route("/quizes")]
-    public async Task<ActionResult<QuestionDto>> GetQuizes(string topic)
+    public async Task<ActionResult<QuizDto>> CreateQuiz([FromBody] string source)
     {      
-        return Ok(await quizService.GenerateQuiz(topic));
+        return Ok(await quizService.CreateQuiz(source));
     }
 }
