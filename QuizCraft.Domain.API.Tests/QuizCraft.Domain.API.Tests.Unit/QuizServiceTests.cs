@@ -23,8 +23,10 @@ public class QuizServiceTests
     }
 
     [Fact]
-    public async void GenerateQuiz_ReturnsExpected()
+    public async Task CreateQuiz_ReturnsExpected()
     {
+        // TODO: Implement proper verification instead of using It.IsAny<Quiz>();
+
         // Arrange
         var expectedQuestions = new List<QuestionDto>
         {
@@ -96,26 +98,28 @@ public class QuizServiceTests
             ]
         };
 
+        var quizDto = new QuizDto()
+        {
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTime.Now,
+            Questions = expectedQuestions
+        };
+
         _geminiAPIClient
-            .Setup(x => x.PostAsync(It.IsAny<string>()))
+            .Setup(x => x.PostAsync(It.Is<string>(x => x.Contains("'cities'"))))
             .ReturnsAsync(responseContent);
 
+        _mapper
+            .Setup(x => x.Map<List<Question>>(expectedQuestions))
+            .Returns(expectedQuiz.Questions);
+
         _quizRepository
-            .Setup(x => x.AddQuizAsync(It.IsAny<Quiz>()))
+            .Setup(x => x.CreateQuizAsync(It.IsAny<Quiz>()))
             .ReturnsAsync(expectedQuiz);
 
         _mapper
-            .Setup(x => x.Map<List<Question>>(It.IsAny<List<QuestionDto>>()))
-            .Returns(expectedQuiz.Questions);
-
-        _mapper
             .Setup(x => x.Map<QuizDto>(It.IsAny<Quiz>()))
-            .Returns(new QuizDto()
-            {
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.Now,
-                Questions = expectedQuestions
-            });
+            .Returns(quizDto);
 
         // Act
         var result = await _quizService.CreateQuiz("cities");
@@ -126,5 +130,49 @@ public class QuizServiceTests
         {
             Assert.Contains(result.Questions[0].Answers, x => x.Text == answer.Text);
         }
+
+        _geminiAPIClient.Verify(x => x.PostAsync(It.Is<string>(x => x.Contains("'cities'"))), Times.Once);
+        _quizRepository.Verify(x => x.CreateQuizAsync(It.IsAny<Quiz>()), Times.Once);
+        _mapper.Verify(x => x.Map<List<Question>>(It.IsAny<List<QuestionDto>>()), Times.Once);
+        _mapper.Verify(x => x.Map<QuizDto>(It.IsAny<Quiz>()), Times.Once);
+    }
+
+    [Fact]
+    public void RetrieveQuizzes_ReturnsExpected()
+    {
+        // Arrange
+        var expectedQuizzes = new List<QuizDto>()
+        {
+            new()
+            {
+                Id = Guid.NewGuid(),
+                CreatedAt = DateTime.Now,
+                Questions =
+                [
+                    new QuestionDto()
+                    {
+                        Text = "What is the capital of France?",
+                        Answers =
+                        [
+                            new AnswerDto() { Text = "Paris" },
+                            new AnswerDto() { Text = "London" },
+                            new AnswerDto() { Text = "Berlin" },
+                            new AnswerDto() { Text = "Madrid" }
+                        ]
+                    }
+                ]
+            }
+        };
+
+        _quizRepository
+            .Setup(x => x.RetrieveQuizzes())
+            .Returns(expectedQuizzes);
+        // Act
+        var result = _quizService.RetrieveQuizzes();
+
+        // Assert
+        Assert.Equal(expectedQuizzes, result);
+
+        _quizRepository.Verify(x => x.RetrieveQuizzes(), Times.Once);
     }
 }

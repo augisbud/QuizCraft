@@ -60,6 +60,7 @@ public class ControllerTestsFixture
         context.Database.EnsureDeleted();
 
         context.Database.EnsureCreated();
+        context.Quizzes.AddRange(DataFixture.Quizzes);
         context.SaveChanges();
     }
 }

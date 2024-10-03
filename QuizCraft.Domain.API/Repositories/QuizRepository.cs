@@ -1,11 +1,14 @@
+using AutoMapper;
+using AutoMapper.QueryableExtensions;
 using QuizCraft.Domain.API.Data;
 using QuizCraft.Domain.API.Entities;
+using QuizCraft.Domain.API.Models;
 
 namespace QuizCraft.Domain.API.Repositories;
 
-public class QuizRepository(QuizzesDbContext context) : IQuizRepository
+public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRepository
 {
-    public async Task<Quiz> AddQuizAsync(Quiz quiz)
+    public async Task<Quiz> CreateQuizAsync(Quiz quiz)
     {
         var result = await context.Quizzes.AddAsync(quiz);
         
@@ -14,8 +17,10 @@ public class QuizRepository(QuizzesDbContext context) : IQuizRepository
         return result.Entity;
     }
 
-    public IEnumerable<Quiz> GetQuizzes()
+    public IEnumerable<QuizDto> RetrieveQuizzes()
     {
-        return [ .. context.Quizzes ];
+        var data = context.Quizzes.ProjectTo<QuizDto>(mapper.ConfigurationProvider).ToList();
+
+        return data;
     }
 }

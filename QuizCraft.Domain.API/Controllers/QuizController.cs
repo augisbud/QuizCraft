@@ -8,9 +8,16 @@ namespace QuizCraft.Domain.API.Controllers;
 public class QuizController(IQuizService quizService) : ControllerBase
 {
     [HttpPost]
-    [Route("/quizes")]
+    [Route("/quiz")]
     public async Task<ActionResult<QuizDto>> CreateQuiz([FromBody] string source)
     {      
         return Ok(await quizService.CreateQuiz(source));
+    }
+
+    [HttpGet]
+    [Route("/quizzes")]
+    public ActionResult<IEnumerable<QuizDto>> RetrieveQuizzes()
+    {
+        return Ok(quizService.RetrieveQuizzes());
     }
 }

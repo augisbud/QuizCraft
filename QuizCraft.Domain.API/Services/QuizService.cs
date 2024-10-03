@@ -36,11 +36,18 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
         var data = JsonSerializer.Deserialize<List<QuestionDto>>(response.Candidates[0].Content.Parts[0].Text) ?? throw new NotImplementedException("Invalid response from the API.");
         
-        var quiz = await repository.AddQuizAsync(new Quiz
+        var quiz = await repository.CreateQuizAsync(new Quiz
         {
             Questions = mapper.Map<List<Question>>(data)
         });
 
         return mapper.Map<QuizDto>(quiz);
+    }
+
+    public IEnumerable<QuizDto> RetrieveQuizzes()
+    {
+        var quizzes = repository.RetrieveQuizzes();
+
+        return quizzes;
     }
 }
