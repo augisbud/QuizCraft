@@ -76,7 +76,7 @@ jobs:
             docker pull ghcr.io/augisbud/quizcraft/backend:latest
             docker stop backend || true
             docker rm backend || true
-            docker run -d --name backend  --network internal -p 8080:8080 \
+            docker run -d --name backend --network internal --restart unless-stopped -p 8080:8080 \
               -e ConnectionStrings__DefaultConnection="${{ secrets.CONNECTION_STRING }}" \
               -e GeminiAPIKey="${{ secrets.GEMINI_API_KEY }}" \
               ghcr.io/augisbud/quizcraft/backend:latest
