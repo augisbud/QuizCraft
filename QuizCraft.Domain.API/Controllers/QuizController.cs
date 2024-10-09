@@ -9,16 +9,17 @@ namespace QuizCraft.Domain.API.Controllers;
 public class QuizController(IQuizService quizService) : ControllerBase
 {
     [HttpPost]
-    [Route("generate")]
-    public async Task<ActionResult<QuestionDto>> GenerateQuiz([FromBody] FileProcessingResultDto request)
-    {
-        if (string.IsNullOrEmpty(request.ProcessedData))
-        {
-            return BadRequest("Processed data is required.");
-        }
+    [Route("/quiz")]
+    public async Task<ActionResult<QuizDto>> CreateQuiz([FromBody] string source)
+    {      
+        return Ok(await quizService.CreateQuiz(source));
+    }
 
-        var quiz = await quizService.GenerateQuiz(request.ProcessedData);
-        return Ok(quiz);
+    [HttpGet]
+    [Route("/quizzes")]
+    public ActionResult<IEnumerable<QuizDto>> RetrieveQuizzes()
+    {
+        return Ok(quizService.RetrieveQuizzes());
     }
 
 }

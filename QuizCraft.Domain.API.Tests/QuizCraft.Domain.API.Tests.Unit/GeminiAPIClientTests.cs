@@ -86,7 +86,7 @@ public class GeminiAPIClientTests
     }
 
     [Fact]
-    public async Task PostAsync_InvalidResponse_ThrowsHttpRequestException()
+    public async Task PostAsync_InvalidResponse_ThrowsException()
     {
         // Arrange
         var prompt = "Test prompt";
