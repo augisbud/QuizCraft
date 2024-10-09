@@ -1,18 +1,17 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import styles from './App.module.scss';
+import { QuestionDto } from './types';
 
 export const App = () => {
-    // Update state to specify that file can be `File` or `null`
     const [file, setFile] = useState<File | null>(null);
+    const [quiz, setQuiz] = useState<QuestionDto | null>(null);
 
-    // Type the event as `ChangeEvent<HTMLInputElement>`
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
-            setFile(event.target.files[0]);  // Ensure file is not null
+            setFile(event.target.files[0]);
         }
     };
 
-    // Type the submit event as `FormEvent<HTMLFormElement>`
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -25,14 +24,30 @@ export const App = () => {
         formData.append('file', file);
 
         try {
-            const response = await fetch('https://localhost:8080/upload', {
+            const uploadResponse = await fetch('https://localhost:8080/upload', {
                 method: 'POST',
                 body: formData,
             });
 
-            if (response.ok) {
-                const message = await response.text();
-                alert(message);
+            if (uploadResponse.ok) {
+                const message = await uploadResponse.json(); // Expect JSON response
+                const processedData = message.processedData; // Extract processed data
+
+                const quizResponse = await fetch('https://localhost:8080/quiz/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ processedData }), // Send processed data
+                });
+
+                if (quizResponse.ok) {
+                    const quizData: QuestionDto = await quizResponse.json(); // Deserialize to QuestionDto
+                    setQuiz(quizData);
+                } else {
+                    const errorText = await quizResponse.text();
+                    alert(`Quiz generation failed: ${errorText}`);
+                }
             } else {
                 alert('File upload failed.');
             }
@@ -49,8 +64,19 @@ export const App = () => {
                 <input type="file" onChange={handleFileChange} />
                 <button className={styles.button} type="submit">Upload</button>
             </form>
+
+            {quiz && (
+                <div className={styles.quiz}>
+                    <h2>{quiz.text}</h2>
+                    <ul>
+                        {quiz.answers.map((answer, index) => (
+                            <li key={index}>{answer.text}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
-}
+};
 
 export default App;

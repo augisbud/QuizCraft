@@ -5,12 +5,20 @@ using QuizCraft.Domain.API.Services;
 namespace QuizCraft.Domain.API.Controllers;
 
 [ApiController]
+[Route("quiz")]
 public class QuizController(IQuizService quizService) : ControllerBase
 {
-    [HttpGet]
-    [Route("/quizes")]
-    public async Task<ActionResult<QuestionDto>> GetQuizes(string topic)
-    {      
-        return Ok(await quizService.GenerateQuiz(topic));
+    [HttpPost]
+    [Route("generate")]
+    public async Task<ActionResult<QuestionDto>> GenerateQuiz([FromBody] FileProcessingResultDto request)
+    {
+        if (string.IsNullOrEmpty(request.ProcessedData))
+        {
+            return BadRequest("Processed data is required.");
+        }
+
+        var quiz = await quizService.GenerateQuiz(request.ProcessedData);
+        return Ok(quiz);
     }
+
 }
