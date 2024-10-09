@@ -33,32 +33,32 @@ public class GeminiAPIClientTests
     }
 
     [Fact]
-    public async void PostAsync_ValidResponse_ReturnsOutput()
+    public async Task PostAsync_ValidResponse_ReturnsOutput()
     {
         // Arrange
         var prompt = "Test prompt";
         var expectedOutput = new Output
         {
-            Candidates =
-            [
+            Candidates = new List<Candidate>
+            {
                 new Candidate
                 {
                     Content = new Content
                     {
-                        Parts =
-                        [
+                        Parts = new List<Part>
+                        {
                             new Part { Text = "Response text" }
-                        ],
+                        },
                         Role = null
                     },
                     FinishReason = "complete",
                     Index = 0,
-                    SafetyRatings =
-                    [
+                    SafetyRatings = new List<SafetyRating>
+                    {
                         new SafetyRating { Category = "safe", Probability = "high" }
-                    ]
+                    }
                 }
-            ],
+            },
             UsageMetadata = new UsageMetadata
             {
                 PromptTokenCount = 1,
@@ -86,7 +86,7 @@ public class GeminiAPIClientTests
     }
 
     [Fact]
-    public async void PostAsync_InvalidResponse_ThrowsException()
+    public async Task PostAsync_InvalidResponse_ThrowsHttpRequestException()
     {
         // Arrange
         var prompt = "Test prompt";
@@ -98,6 +98,7 @@ public class GeminiAPIClientTests
             .ReturnsAsync(httpResponseMessage);
 
         // Act & Assert
-        await Assert.ThrowsAsync<HttpRequestException>(() => _geminiAPIClient.PostAsync(prompt));
+        var exception = await Assert.ThrowsAsync<HttpRequestException>(() => _geminiAPIClient.PostAsync(prompt));
+        Assert.Contains("Response status code does not indicate success", exception.Message);
     }
 }

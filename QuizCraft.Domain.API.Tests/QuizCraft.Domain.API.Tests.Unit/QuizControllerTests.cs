@@ -4,43 +4,52 @@ using QuizCraft.Domain.API.Controllers;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Services;
 
-namespace QuizCraft.Domain.API.Tests.Unit;
-
-public class QuizControllerTests
+namespace QuizCraft.Domain.API.Tests.Unit
 {
-    private readonly Mock<IQuizService> _quizService = new();
-    private readonly QuizController _controller;
-    
-    public QuizControllerTests()
+    public class QuizControllerTests
     {
-        _controller = new(_quizService.Object);
-    }
+        private readonly Mock<IQuizService> _quizService = new();
+        private readonly QuizController _controller;
 
-    [Fact]
-    public async void GetQuizes_ReturnsExpected()
-    {
-        // Arrange
-        var expectedOutput = new QuestionDto()
+        public QuizControllerTests()
         {
-            Text = "What is the capital of France?",
-            Answers = [
-                new()
+            _controller = new(_quizService.Object);
+        }
+
+        [Fact]
+        public async void GenerateQuiz_ReturnsExpected()
+        {
+            // Arrange
+            var expectedOutput = new QuestionDto()
+            {
+                Text = "What is the capital of France?",
+                Answers = new List<AnswerDto>
                 {
-                    Text = "Paris"
-                },
-            ]
-        };
+                    new() { Text = "Paris" },
+                    new() { Text = "London" },
+                    new() { Text = "Berlin" },
+                    new() { Text = "Madrid" }
+                }
+            };
 
-        _quizService
-            .Setup(x => x.GenerateQuiz("cities"))
-            .ReturnsAsync(expectedOutput);
+            var fileProcessingResult = new FileProcessingResultDto
+            {
+                ProcessedData = "The capital of France is Paris." // Simulated file content
+            };
 
-        // Act
-        var response = await _controller.GetQuizes("cities");
+            _quizService
+                .Setup(x => x.GenerateQuiz(fileProcessingResult.ProcessedData))
+                .ReturnsAsync(expectedOutput);
 
-        // Assert
-        var result = Assert.IsType<OkObjectResult>(response.Result);
-        var data = Assert.IsAssignableFrom<QuestionDto>(result.Value);
-        Assert.Equal(expectedOutput, data);
+            // Act
+            var response = await _controller.GenerateQuiz(fileProcessingResult);
+
+            // Assert
+            var result = Assert.IsType<OkObjectResult>(response.Result);
+            var data = Assert.IsAssignableFrom<QuestionDto>(result.Value);
+            Assert.Equal(expectedOutput.Text, data.Text);
+            Assert.Equal(expectedOutput.Answers.Count, data.Answers.Count);
+            Assert.Equal(expectedOutput.Answers[0].Text, data.Answers[0].Text);
+        }
     }
 }

@@ -20,15 +20,18 @@ public class QuizServiceTests
     public async void GenerateQuiz_ReturnsExpected()
     {
         // Arrange
+        var processedData = "The solar system consists of the Sun and the objects that orbit it, including eight planets, their moons, and various smaller bodies like asteroids and comets.";
+
         var expectedOutput = new QuestionDto()
         {
-            Text = "What is the capital of France?",
-            Answers = [
-                new() { Text = "Paris" },
-                new() { Text = "London" },
-                new() { Text = "Berlin" },
-                new() { Text = "Madrid" }
-            ]
+            Text = "What is the central star of the solar system?",
+            Answers = new List<AnswerDto>
+        {
+            new() { Text = "Earth" },
+            new() { Text = "Mars" },
+            new() { Text = "Sun" },
+            new() { Text = "Jupiter" }
+        }
         };
 
         var responseContent = new Output()
@@ -70,7 +73,7 @@ public class QuizServiceTests
             .ReturnsAsync(responseContent);
 
         // Act
-        var result = await _quizService.GenerateQuiz("cities");
+        var result = await _quizService.GenerateQuiz(processedData);
 
         // Assert
         Assert.Equal(expectedOutput.Text, result.Text);
