@@ -122,7 +122,7 @@ public class QuizServiceTests
             .Returns(quizDto);
 
         // Act
-        var result = await _quizService.GenerateQuiz(processedData);
+        var result = await _quizService.CreateQuiz("cities");
 
         // Assert
         Assert.Equal(expectedQuestions[0].Text, result.Questions[0].Text);

@@ -1,10 +1,10 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import styles from './App.module.scss';
-import { QuestionDto } from './types';
+import { QuizDto } from './types';
 
 export const App = () => {
     const [file, setFile] = useState<File | null>(null);
-    const [quiz, setQuiz] = useState<QuestionDto | null>(null);
+    const [quiz, setQuiz] = useState<QuizDto | null>(null);
 
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
@@ -38,11 +38,11 @@ export const App = () => {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ processedData }), // Send processed data
+                    body: JSON.stringify(processedData),
                 });
 
                 if (quizResponse.ok) {
-                    const quizData: QuestionDto = await quizResponse.json(); // Deserialize to QuestionDto
+                    const quizData: QuizDto = await quizResponse.json();
                     setQuiz(quizData);
                 } else {
                     const errorText = await quizResponse.text();
@@ -67,9 +67,9 @@ export const App = () => {
 
             {quiz && (
                 <div className={styles.quiz}>
-                    <h2>{quiz.text}</h2>
+                    <h2>{quiz.questions[0].text}</h2> {}
                     <ul>
-                        {quiz.answers.map((answer, index) => (
+                        {quiz.questions[0].answers.map((answer, index) => (
                             <li key={index}>{answer.text}</li>
                         ))}
                     </ul>

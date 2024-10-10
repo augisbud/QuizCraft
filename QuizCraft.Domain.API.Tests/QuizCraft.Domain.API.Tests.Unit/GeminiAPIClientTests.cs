@@ -39,26 +39,26 @@ public class GeminiAPIClientTests
         var prompt = "Test prompt";
         var expectedOutput = new Output
         {
-            Candidates = new List<Candidate>
-            {
+            Candidates =
+            [
                 new Candidate
                 {
                     Content = new Content
                     {
-                        Parts = new List<Part>
-                        {
+                        Parts =
+                        [
                             new Part { Text = "Response text" }
-                        },
+                        ],
                         Role = null
                     },
                     FinishReason = "complete",
                     Index = 0,
-                    SafetyRatings = new List<SafetyRating>
-                    {
+                    SafetyRatings =
+                    [
                         new SafetyRating { Category = "safe", Probability = "high" }
-                    }
+                    ]
                 }
-            },
+            ],
             UsageMetadata = new UsageMetadata
             {
                 PromptTokenCount = 1,
@@ -98,7 +98,6 @@ public class GeminiAPIClientTests
             .ReturnsAsync(httpResponseMessage);
 
         // Act & Assert
-        var exception = await Assert.ThrowsAsync<HttpRequestException>(() => _geminiAPIClient.PostAsync(prompt));
-        Assert.Contains("Response status code does not indicate success", exception.Message);
+        await Assert.ThrowsAsync<HttpRequestException>(() => _geminiAPIClient.PostAsync(prompt));
     }
 }

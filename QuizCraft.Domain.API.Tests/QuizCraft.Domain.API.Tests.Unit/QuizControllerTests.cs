@@ -4,12 +4,17 @@ using QuizCraft.Domain.API.Controllers;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Services;
 
-namespace QuizCraft.Domain.API.Tests.Unit
+namespace QuizCraft.Domain.API.Tests.Unit;
+
+public class QuizControllerTests
 {
-    public class QuizControllerTests
+    private readonly Mock<IQuizService> _quizService = new();
+    private readonly QuizController _controller;
+
+    public QuizControllerTests()
     {
-        private readonly Mock<IQuizService> _quizService = new();
-        private readonly QuizController _controller;
+        _controller = new(_quizService.Object);
+    }
 
     [Fact]
     public async Task CreateQuiz_ReturnsExpected()
