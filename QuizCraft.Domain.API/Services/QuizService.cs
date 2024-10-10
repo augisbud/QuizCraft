@@ -34,20 +34,46 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
         var response = await geminiAPIClient.PostAsync(prompt);
 
-        var data = JsonSerializer.Deserialize<List<QuestionDto>>(response.Candidates[0].Content.Parts[0].Text) ?? throw new NotImplementedException("Invalid response from the API.");
-        
-        var quiz = await repository.CreateQuizAsync(new Quiz
-        {
-            Questions = mapper.Map<List<Question>>(data)
-        });
+        var jsonString = response.Candidates[0].Content.Parts[0].Text
+            .Replace("```json", "")
+            .Replace("```", "")
+            .Replace("\n", "")
+            .Trim();
 
-        return mapper.Map<QuizDto>(quiz);
+        try
+        {
+            var data = JsonSerializer.Deserialize<List<QuestionDto>>(jsonString)
+                ?? throw new NotImplementedException("Invalid response from the API.");
+
+            var quiz = await repository.CreateQuizAsync(new Quiz
+            {
+                Questions = mapper.Map<List<Question>>(data)
+            });
+
+            return mapper.Map<QuizDto>(quiz);
+            
+            // Return a mock QuizDto for now
+            //return new QuizDto
+            //{
+            //    Id = Guid.NewGuid(),
+            //    CreatedAt = DateTime.UtcNow,
+            //    Questions = data
+            //};
+        }
+        catch (JsonException ex)
+        {
+            Console.WriteLine($"Deserialization failed: {ex.Message}");
+            Console.WriteLine($"Raw JSON: {jsonString}");
+            throw;
+        }
     }
 
     public IEnumerable<QuizDto> RetrieveQuizzes()
     {
         var quizzes = repository.RetrieveQuizzes();
-
         return quizzes;
+
+        //do not use DB for now
+        //return new List<QuizDto>();
     }
 }

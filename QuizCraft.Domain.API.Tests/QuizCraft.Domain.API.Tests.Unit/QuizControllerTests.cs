@@ -10,7 +10,7 @@ public class QuizControllerTests
 {
     private readonly Mock<IQuizService> _quizService = new();
     private readonly QuizController _controller;
-    
+
     public QuizControllerTests()
     {
         _controller = new(_quizService.Object);

@@ -16,7 +16,7 @@ public class FileUploadController(IFileProcessingService fileProcessingService) 
 
         var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
 
-        Console.WriteLine($"Uploaded file extension: {fileExtension}");
+        //Console.WriteLine($"Uploaded file extension: {fileExtension}");
 
         if (fileExtension != ".txt" && fileExtension != ".docx" && fileExtension != ".pdf")
             return BadRequest("Invalid file type. Only .txt, .docx and .pdf files are allowed.");

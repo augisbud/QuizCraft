@@ -3,6 +3,10 @@ using System.Text;
 using Newtonsoft.Json;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Tests.Integration.Fixtures;
+using Microsoft.Extensions.DependencyInjection;
+using QuizCraft.Domain.API.Data;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace QuizCraft.Domain.API.Tests.Integration;
 
@@ -15,7 +19,7 @@ public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<Con
         var client = fixture.Factory.CreateClient();
 
         // Act
-        var response = await client.PostAsync("/quiz", new StringContent(JsonConvert.SerializeObject("A very extensive source about cities"), Encoding.UTF8, "application/json"));
+        var response = await client.PostAsync("/quiz/generate", new StringContent(JsonConvert.SerializeObject("A very extensive source about cities"), Encoding.UTF8, "application/json"));
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -36,7 +40,13 @@ public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<Con
         var client = fixture.Factory.CreateClient();
 
         // Act
-        var response = await client.GetAsync("/quizzes");
+        var response = await client.GetAsync("/quiz/quizzes");
+
+        // Log the quizzes to verify if they're in the database
+        using var scope = fixture.Factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<QuizzesDbContext>();
+        var allQuizzes = await context.Quizzes.ToListAsync();
+        Console.WriteLine(JsonConvert.SerializeObject(allQuizzes));
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
