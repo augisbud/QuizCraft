@@ -63,6 +63,6 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
     public async Task<IEnumerable<QuizDto>> RetrieveQuizzesAsync()
     {
         var quizzes = await repository.RetrieveQuizzesAsync();
-        return quizzes.Select(q => mapper.Map<QuizDto>(q));
+        return quizzes?.Select(q => mapper.Map<QuizDto>(q)) ?? Enumerable.Empty<QuizDto>();
     }
 }

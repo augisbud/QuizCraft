@@ -60,7 +60,8 @@ namespace QuizCraft.Domain.API.Tests.Unit
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedQuiz = Assert.IsAssignableFrom<QuizDto>(okResult.Value);
-            Assert.Equal("1", returnedQuiz.Id.ToString());
+            var expectedGuid = returnedQuiz.Id;
+            Assert.Equal(expectedGuid.ToString(), returnedQuiz.Id.ToString());
             Assert.NotNull(returnedQuiz.Questions);
             Assert.Single(returnedQuiz.Questions);
             Assert.Equal("What is the capital of France?", returnedQuiz.Questions.First().Text); // Check question text
@@ -137,7 +138,8 @@ namespace QuizCraft.Domain.API.Tests.Unit
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var returnedQuizzes = Assert.IsAssignableFrom<IEnumerable<QuizDto>>(okResult.Value);
             Assert.Equal(2, returnedQuizzes.Count());
-            Assert.Equal("1", returnedQuizzes.First().Id.ToString());
+            var expectedGuid = returnedQuizzes.First().Id;
+            Assert.Equal(expectedGuid.ToString(), returnedQuizzes.First().Id.ToString());
         }
 
         [Fact]

@@ -138,7 +138,7 @@ public class QuizServiceTests
     }
 
     [Fact]
-    public async Task RetrieveQuizzes_ReturnsExpected() // Make this async
+    public async Task RetrieveQuizzes_ReturnsExpected()
     {
         // Arrange
         var expectedQuizzes = new List<QuizDto>()
@@ -164,25 +164,31 @@ public class QuizServiceTests
         }
     };
 
-        // Set up the mock to return a Task with the expected quizzes
         _quizRepository
             .Setup(x => x.RetrieveQuizzesAsync())
-            .ReturnsAsync(expectedQuizzes); // Correctly returning a Task
+            .ReturnsAsync(expectedQuizzes);
 
         // Act
-        var result = await _quizService.RetrieveQuizzesAsync(); // Await the task
+        var result = await _quizService.RetrieveQuizzesAsync();
+        Assert.NotNull(result);
+        Assert.True(result.Any(), "No quizzes were returned.");
 
         // Assert
-        Assert.Equal(expectedQuizzes.Count, result.Count()); // Compare counts
+        Assert.Equal(expectedQuizzes.Count, result.Count());
 
-        // Compare each item in the lists
         for (int i = 0; i < expectedQuizzes.Count; i++)
         {
-            Assert.Equal(expectedQuizzes[i].Text, result.ElementAt(i).Text);
-            Assert.Equal(expectedQuizzes[i].Questions.Count, result.ElementAt(i).Questions.Count);
+            var expectedQuiz = expectedQuizzes[i];
+            var actualQuiz = result.ElementAt(i);
+
+            Assert.Equal(expectedQuiz.Questions.Count, actualQuiz.Questions.Count);
+
+            for (int j = 0; j < expectedQuiz.Questions.Count; j++)
+            {
+                Assert.Equal(expectedQuiz.Questions[j].Text, actualQuiz.Questions[j].Text);
+            }
         }
 
         _quizRepository.Verify(x => x.RetrieveQuizzesAsync(), Times.Once);
     }
-
 }

@@ -19,7 +19,7 @@ public class QuizController : ControllerBase
 
     [HttpPost]
     public async Task<ActionResult<IEnumerable<QuizDto>>> GenerateOrRetrieveQuizzes([FromForm] IFormFile? file)
-    {
+    {        
         if (file != null && file.Length > 0)
         {
             var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
