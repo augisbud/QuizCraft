@@ -6,5 +6,5 @@ namespace QuizCraft.Domain.API.Repositories;
 public interface IQuizRepository
 {
     Task<Quiz> CreateQuizAsync(Quiz quiz);
-    IEnumerable<QuizDto> RetrieveQuizzes();
+    Task<IEnumerable<QuizDto>> RetrieveQuizzesAsync();
 }

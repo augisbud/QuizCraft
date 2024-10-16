@@ -19,18 +19,20 @@ public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<Con
         var client = fixture.Factory.CreateClient();
 
         // Act
-        var response = await client.PostAsync("/quiz/generate", new StringContent(JsonConvert.SerializeObject("A very extensive source about cities"), Encoding.UTF8, "application/json"));
+        var response = await client.PostAsync("/quizzes", new StringContent(JsonConvert.SerializeObject("A very extensive source about cities"), Encoding.UTF8, "application/json"));
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
-        var data = JsonConvert.DeserializeObject<QuizDto>(await response.Content.ReadAsStringAsync());
+        var data = JsonConvert.DeserializeObject<List<QuizDto>>(await response.Content.ReadAsStringAsync());
         Assert.NotNull(data);
-        Assert.Single(data.Questions);
-        Assert.Equal("What is the capital of France?", data.Questions[0].Text);
-        Assert.Equal(2, data.Questions[0].Answers.Count);
-        Assert.Equal("Paris", data.Questions[0].Answers[0].Text);
-        Assert.Equal("Madrid", data.Questions[0].Answers[1].Text);
+        Assert.Single(data);
+
+        Assert.Single(data[0].Questions);
+        Assert.Equal("What is 2 + 2?", data[0].Questions[0].Text);
+        Assert.Equal(2, data[0].Questions[0].Answers.Count); 
+        Assert.Equal("4", data[0].Questions[0].Answers[0].Text);
+        Assert.Equal("5", data[0].Questions[0].Answers[1].Text);
     }
 
     [Fact]
@@ -39,10 +41,11 @@ public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<Con
         // Arrange
         var client = fixture.Factory.CreateClient();
 
+        var requestContent = new StringContent("{}", Encoding.UTF8, "application/json");
         // Act
-        var response = await client.GetAsync("/quiz/quizzes");
+        var response = await client.PostAsync("/quizzes", requestContent);
 
-        // Log the quizzes to verify if they're in the database
+        // Log the quizzes
         using var scope = fixture.Factory.Services.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<QuizzesDbContext>();
         var allQuizzes = await context.Quizzes.ToListAsync();
@@ -52,6 +55,7 @@ public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<Con
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
 
         var data = JsonConvert.DeserializeObject<List<QuizDto>>(await response.Content.ReadAsStringAsync());
+
         Assert.NotNull(data);
         Assert.Single(data);
         Assert.Equal(DataFixture.Quizzes.First().Id, data[0].Id);

@@ -138,41 +138,51 @@ public class QuizServiceTests
     }
 
     [Fact]
-    public void RetrieveQuizzes_ReturnsExpected()
+    public async Task RetrieveQuizzes_ReturnsExpected() // Make this async
     {
         // Arrange
         var expectedQuizzes = new List<QuizDto>()
+    {
+        new()
         {
-            new()
-            {
-                Id = Guid.NewGuid(),
-                CreatedAt = DateTime.Now,
-                Questions =
-                [
-                    new QuestionDto()
-                    {
-                        Text = "What is the capital of France?",
-                        Answers =
-                        [
-                            new AnswerDto() { Text = "Paris" },
-                            new AnswerDto() { Text = "London" },
-                            new AnswerDto() { Text = "Berlin" },
-                            new AnswerDto() { Text = "Madrid" }
-                        ]
-                    }
-                ]
-            }
-        };
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTime.Now,
+            Questions =
+            [
+                new QuestionDto()
+                {
+                    Text = "What is the capital of France?",
+                    Answers =
+                    [
+                        new AnswerDto() { Text = "Paris" },
+                        new AnswerDto() { Text = "London" },
+                        new AnswerDto() { Text = "Berlin" },
+                        new AnswerDto() { Text = "Madrid" }
+                    ]
+                }
+            ]
+        }
+    };
 
+        // Set up the mock to return a Task with the expected quizzes
         _quizRepository
-            .Setup(x => x.RetrieveQuizzes())
-            .Returns(expectedQuizzes);
+            .Setup(x => x.RetrieveQuizzesAsync())
+            .ReturnsAsync(expectedQuizzes); // Correctly returning a Task
+
         // Act
-        var result = _quizService.RetrieveQuizzes();
+        var result = await _quizService.RetrieveQuizzesAsync(); // Await the task
 
         // Assert
-        Assert.Equal(expectedQuizzes, result);
+        Assert.Equal(expectedQuizzes.Count, result.Count()); // Compare counts
 
-        _quizRepository.Verify(x => x.RetrieveQuizzes(), Times.Once);
+        // Compare each item in the lists
+        for (int i = 0; i < expectedQuizzes.Count; i++)
+        {
+            Assert.Equal(expectedQuizzes[i].Text, result.ElementAt(i).Text);
+            Assert.Equal(expectedQuizzes[i].Questions.Count, result.ElementAt(i).Questions.Count);
+        }
+
+        _quizRepository.Verify(x => x.RetrieveQuizzesAsync(), Times.Once);
     }
+
 }

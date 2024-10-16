@@ -51,14 +51,6 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
             });
 
             return mapper.Map<QuizDto>(quiz);
-            
-            // Return a mock QuizDto for now
-            //return new QuizDto
-            //{
-            //    Id = Guid.NewGuid(),
-            //    CreatedAt = DateTime.UtcNow,
-            //    Questions = data
-            //};
         }
         catch (JsonException ex)
         {
@@ -68,12 +60,9 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         }
     }
 
-    public IEnumerable<QuizDto> RetrieveQuizzes()
+    public async Task<IEnumerable<QuizDto>> RetrieveQuizzesAsync()
     {
-        var quizzes = repository.RetrieveQuizzes();
-        return quizzes;
-
-        //do not use DB for now
-        //return new List<QuizDto>();
+        var quizzes = await repository.RetrieveQuizzesAsync();
+        return quizzes.Select(q => mapper.Map<QuizDto>(q));
     }
 }
