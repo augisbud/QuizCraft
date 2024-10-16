@@ -7,29 +7,33 @@ public interface IGeminiAPIClient
     Task<Output> PostAsync(string prompt);
 }
 
-public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient) : IGeminiAPIClient
+public class GeminiAPIClient : IGeminiAPIClient
 {   
-    private readonly string APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new NotImplementedException(); // Ideally, we create our own exception class to inform the user about invalid configuration.
+    private readonly string APIKey;
     private readonly JsonSerializerOptions jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly HttpClient httpClient;
+
+    public GeminiAPIClient(IConfiguration configuration, HttpClient httpClient)
+    {
+        APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new NotImplementedException(); // Ideally, we create our own exception class to inform the user about invalid configuration.
+        this.httpClient = httpClient;
+    }
 
     public async Task<Output> PostAsync(string prompt)
     {
         var input = new Input()
         {
-            Contents = new List<Content>
-        {
-            new Content
-            {
-                Parts = new List<Part>
+            Contents =
+            [
+                new()
                 {
-                    new Part
-                    {
-                        Text = prompt
-                    }
-                },
-                Role = "user" // default role
-            }
-        }
+                    Parts =
+                    [
+                        new(prompt)
+                    ],
+                    Role = "user" // default role
+                }
+            ]
         };
 
         try
@@ -63,8 +67,6 @@ public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient
             throw new Exception("An unexpected error occurred: " + ex.Message, ex);
         }
     }
-
-
 }
 
 public class Input
@@ -105,7 +107,8 @@ public class SafetyRating
     public required string Probability { get; set; }
 }
 
-public class Part
+// 2. Creating and using your own struct
+public struct Part(string text)
 {
-    public required string Text { get; set; }
+    public string Text { get; set; } = text;
 }

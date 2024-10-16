@@ -2,6 +2,7 @@ import { useState, ChangeEvent, FormEvent } from 'react';
 import styles from './App.module.scss';
 import { QuizDto } from './types';
 
+// 1. Application can be interacted with using *some* sort of interface
 export const App = () => {
     const [file, setFile] = useState<File | null>(null);
     const [quiz, setQuiz] = useState<QuizDto | null>(null);
@@ -24,32 +25,17 @@ export const App = () => {
         formData.append('file', file);
 
         try {
-            const uploadResponse = await fetch('https://localhost:8080/upload', {
+            const quizzesResponse = await fetch('https://localhost:8080/quizzes', {
                 method: 'POST',
                 body: formData,
             });
 
-            if (uploadResponse.ok) {
-                const message = await uploadResponse.json(); // Expect JSON response
-                const processedData = message.processedData; // Extract processed data
-
-                const quizResponse = await fetch('https://localhost:8080/quiz/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(processedData),
-                });
-
-                if (quizResponse.ok) {
-                    const quizData: QuizDto = await quizResponse.json();
-                    setQuiz(quizData);
-                } else {
-                    const errorText = await quizResponse.text();
-                    alert(`Quiz generation failed: ${errorText}`);
-                }
+            if (quizzesResponse.ok) {
+                const quizData: QuizDto = await quizzesResponse.json();
+                setQuiz(quizData);
             } else {
-                alert('File upload failed.');
+                const errorText = await quizzesResponse.text();
+                alert(`Quiz generation failed: ${errorText}`);
             }
         } catch (error) {
             console.error('Error during file upload:', error);

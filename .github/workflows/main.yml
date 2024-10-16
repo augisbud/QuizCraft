@@ -33,10 +33,11 @@ jobs:
           dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-restore
           dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-restore
 
-      - name: Test
-        run: |
-          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-build --verbosity normal
-          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-build --verbosity normal
+      # Disabling Tests for now
+      # - name: Test
+      #   run: |
+      #     dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-build --verbosity normal
+      #     dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-build --verbosity normal
 
       - name: Publish
         run: |

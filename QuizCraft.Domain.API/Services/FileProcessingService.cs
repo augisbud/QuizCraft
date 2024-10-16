@@ -1,87 +1,70 @@
-using Microsoft.AspNetCore.Http;
-using QuizCraft.Domain.API.Models;
-using System.IO;
-using System.Threading.Tasks;
 using System.Text;
-using Xceed.Words.NET; // For .docx
-using iText.Kernel.Pdf; // For .pdf
-using iText.Kernel.Pdf.Canvas.Parser; // For .pdf
+using Xceed.Words.NET;
+using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Canvas.Parser;
+using QuizCraft.Domain.API.Exceptions;
 
-namespace QuizCraft.Domain.API.Services
+namespace QuizCraft.Domain.API.Services;
+
+public class FileProcessingService : IFileProcessingService
 {
-    public class FileProcessingService : IFileProcessingService
+    public async Task<string> ProcessFileAsync(IFormFile file)
     {
-        public async Task<FileProcessingResultDto> ProcessFileAsync(IFormFile file)
+        var fileExtension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        string processedData = fileExtension switch
         {
-            using (var stream = new MemoryStream())
-            {
-                await file.CopyToAsync(stream);
-                stream.Position = 0; // Reset stream position
+            ".txt" => await ProcessTextFileAsync(file),
+            ".docx" => await ProcessDocxFileAsync(file),
+            ".pdf" => await ProcessPdfFileAsync(file),
+            _ => throw new InvalidFileExtensionException(fileExtension)
+        };
 
-                string processedData;
+        return processedData;
+    }
 
-                switch (Path.GetExtension(file.FileName).ToLower())
-                {
-                    case ".txt":
-                        processedData = await ProcessTextFileAsync(stream);
-                        break;
+    private static async Task<string> ProcessTextFileAsync(IFormFile file)
+    {
+        using var reader = new StreamReader(ProcessStream(file), Encoding.UTF8);
 
-                    case ".docx":
-                        processedData = await ProcessDocxFileAsync(stream);
-                        break;
+        return await reader.ReadToEndAsync();
+    }
 
-                    case ".pdf":
-                        processedData = await ProcessPdfFileAsync(stream);
-                        break;
-
-                    default:
-                        throw new NotSupportedException("File type not supported.");
-                }
-
-                return new FileProcessingResultDto
-                {
-                    ProcessedData = processedData
-                };
-            }
-        }
-
-        private async Task<string> ProcessTextFileAsync(Stream stream)
+    private static async Task<string> ProcessDocxFileAsync(IFormFile file)
+    {
+        using var document = DocX.Load(ProcessStream(file));
+        
+        var text = new StringBuilder();
+        foreach (var paragraph in document.Paragraphs)
         {
-            using (var reader = new StreamReader(stream, Encoding.UTF8))
-            {
-                return await reader.ReadToEndAsync();
-            }
+            text.Append(paragraph.Text);
+            text.AppendLine();
         }
+        
+        return await Task.FromResult(text.ToString());
+    }
 
-        private async Task<string> ProcessDocxFileAsync(Stream stream)
-        {
-            using (var document = DocX.Load(stream))
-            {
-                var text = new StringBuilder();
-                foreach (var paragraph in document.Paragraphs)
-                {
-                    text.Append(paragraph.Text);
-                    text.AppendLine();
-                }
-                return await Task.FromResult(text.ToString());
-            }
-        }
+    private static async Task<string> ProcessPdfFileAsync(IFormFile file)
+    {
+        using var pdfReader = new PdfReader(ProcessStream(file));
+        using var pdfDocument = new PdfDocument(pdfReader);
 
-        private async Task<string> ProcessPdfFileAsync(Stream stream)
+        var text = new StringBuilder();
+        for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
         {
-            using (var pdfReader = new PdfReader(stream))
-            {
-                using (var pdfDocument = new PdfDocument(pdfReader))
-                {
-                    var text = new StringBuilder();
-                    for (int i = 1; i <= pdfDocument.GetNumberOfPages(); i++)
-                    {
-                        var page = pdfDocument.GetPage(i);
-                        text.Append(PdfTextExtractor.GetTextFromPage(page));
-                    }
-                    return await Task.FromResult(text.ToString());
-                }
-            }
+            var page = pdfDocument.GetPage(i);
+            text.Append(PdfTextExtractor.GetTextFromPage(page));
         }
+        
+        return await Task.FromResult(text.ToString());
+    }
+
+    // 7. Using a stream to load data (can be from file, web service, socket etc.)
+    private static MemoryStream ProcessStream(IFormFile file)
+    {
+        var stream = new MemoryStream();
+        file.CopyTo(stream);
+        stream.Position = 0;
+
+        return stream;
     }
 }

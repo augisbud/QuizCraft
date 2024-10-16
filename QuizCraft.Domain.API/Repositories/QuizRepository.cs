@@ -18,13 +18,21 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         return result.Entity;
     }
 
-    public async Task<IEnumerable<QuizDto>> RetrieveQuizzesAsync()
+    public QuizDto? RetrieveQuizById(Guid id)
     {
-        var data = await context.Quizzes
+        var data = context.Quizzes
+            .Where(quiz => quiz.Id == id)
             .ProjectTo<QuizDto>(mapper.ConfigurationProvider)
-            .ToListAsync();
+            .FirstOrDefault();
 
         return data;
     }
 
+    public IEnumerable<QuizDto> RetrieveQuizzes()
+    {
+        var data = context.Quizzes
+            .ProjectTo<QuizDto>(mapper.ConfigurationProvider);
+
+        return data;
+    }
 }

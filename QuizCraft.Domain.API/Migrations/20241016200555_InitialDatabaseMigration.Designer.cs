@@ -12,7 +12,7 @@ using QuizCraft.Domain.API.Data;
 namespace QuizCraft.Domain.API.Migrations
 {
     [DbContext(typeof(QuizzesDbContext))]
-    [Migration("20241002203937_InitialDatabaseMigration")]
+    [Migration("20241016200555_InitialDatabaseMigration")]
     partial class InitialDatabaseMigration
     {
         /// <inheritdoc />
@@ -30,6 +30,9 @@ namespace QuizCraft.Domain.API.Migrations
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
