@@ -5,18 +5,24 @@ using QuizCraft.Domain.API.Services;
 namespace QuizCraft.Domain.API.Controllers;
 
 [ApiController]
-public class QuizController(IQuizService quizService) : ControllerBase
+public class QuizController(IQuizService quizService, IFileProcessingService fileProcessingService) : ControllerBase
 {
-    [HttpPost]
-    [Route("/quiz")]
-    public async Task<ActionResult<QuizDto>> CreateQuiz([FromBody] string source)
-    {      
-        return Ok(await quizService.CreateQuiz(source));
+    [HttpPost("/quizzes")]
+    public async Task<ActionResult<QuizDto>> CreateQuizAsync([FromForm] IFormFile file)
+    {
+        var source = await fileProcessingService.ProcessFileAsync(file);
+
+        return Ok(await quizService.CreateQuizAsync(source));
     }
 
-    [HttpGet]
-    [Route("/quizzes")]
-    public ActionResult<IEnumerable<QuizDto>> RetrieveQuizzes()
+    [HttpGet("/quizzes/{id}")]
+    public ActionResult<QuizDto> GetQuizById(Guid id)
+    {
+        return Ok(quizService.RetrieveQuizById(id));
+    }
+
+    [HttpGet("/quizzes")]
+    public ActionResult<IEnumerable<QuizDto>> GetQuizzes()
     {
         return Ok(quizService.RetrieveQuizzes());
     }

@@ -1,11 +1,6 @@
-using Microsoft.AspNetCore.Http;
-using QuizCraft.Domain.API.Models;
-using System.Threading.Tasks;
+namespace QuizCraft.Domain.API.Services;
 
-namespace QuizCraft.Domain.API.Services
+public interface IFileProcessingService
 {
-    public interface IFileProcessingService
-    {
-        Task<FileProcessingResultDto> ProcessFileAsync(IFormFile file);
-    }
+    Task<string> ProcessFileAsync(IFormFile file);
 }

@@ -45,8 +45,9 @@ namespace QuizCraft.Domain.API.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false)
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    IsCorrect = table.Column<bool>(type: "boolean", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {

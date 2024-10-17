@@ -28,6 +28,9 @@ namespace QuizCraft.Domain.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
 
