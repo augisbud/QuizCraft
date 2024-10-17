@@ -6,5 +6,5 @@ public interface IQuizService
 {
     Task<QuizDto> CreateQuizAsync(string source);
     QuizDto RetrieveQuizById(Guid id);
-    IEnumerable<QuizDto> RetrieveQuizzes();
+    Task<IEnumerable<QuizDto>> RetrieveQuizzes();
 }

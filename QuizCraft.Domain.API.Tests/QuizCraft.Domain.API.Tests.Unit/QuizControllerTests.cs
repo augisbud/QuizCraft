@@ -4,7 +4,9 @@ using Moq;
 using QuizCraft.Domain.API.Controllers;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Services;
-using Xunit;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace QuizCraft.Domain.API.Tests.Unit
 {
@@ -20,16 +22,16 @@ namespace QuizCraft.Domain.API.Tests.Unit
         }
 
         [Fact]
-        public async Task GenerateOrRetrieveQuizzes_ValidFile_ReturnsGeneratedQuiz()
+        public async Task RetrieveQuizzes_ValidFile_ReturnsGeneratedQuiz()
         {
             // Arrange
             var mockFile = new Mock<IFormFile>();
             mockFile.Setup(f => f.FileName).Returns("test.docx");
             mockFile.Setup(f => f.Length).Returns(1024);
 
-            var processedResult = new FileProcessingResultDto { ProcessedData = "Processed file content" };
+            var processedData = "Processed file content";
             _fileProcessingServiceMock.Setup(s => s.ProcessFileAsync(It.IsAny<IFormFile>()))
-                                      .ReturnsAsync(processedResult);
+                                      .ReturnsAsync(processedData);
 
             var expectedQuiz = new QuizDto
             {
@@ -42,20 +44,20 @@ namespace QuizCraft.Domain.API.Tests.Unit
                         Text = "What is the capital of France?",
                         Answers = new List<AnswerDto>
                         {
-                            new AnswerDto { Text = "Paris" },
-                            new AnswerDto { Text = "London" },
-                            new AnswerDto { Text = "Berlin" },
-                            new AnswerDto { Text = "Madrid" }
+                            new AnswerDto("Paris", true),
+                            new AnswerDto("London", false),
+                            new AnswerDto("Berlin", false),
+                            new AnswerDto("Madrid", false)
                         }
                     }
                 }
             };
 
-            _quizServiceMock.Setup(s => s.CreateQuiz(It.IsAny<string>()))
+            _quizServiceMock.Setup(s => s.CreateQuizAsync(processedData))
                             .ReturnsAsync(expectedQuiz);
 
             // Act
-            var result = await _controller.GenerateOrRetrieveQuizzes(mockFile.Object);
+            var result = await _controller.CreateQuizAsync(mockFile.Object);
 
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
@@ -64,11 +66,11 @@ namespace QuizCraft.Domain.API.Tests.Unit
             Assert.Equal(expectedGuid.ToString(), returnedQuiz.Id.ToString());
             Assert.NotNull(returnedQuiz.Questions);
             Assert.Single(returnedQuiz.Questions);
-            Assert.Equal("What is the capital of France?", returnedQuiz.Questions.First().Text); // Check question text
+            Assert.Equal("What is the capital of France?", returnedQuiz.Questions.First().Text);
         }
 
         [Fact]
-        public async Task GenerateOrRetrieveQuizzes_InvalidFileType_ReturnsBadRequest()
+        public async Task CreateQuizAsync_InvalidFileType_ReturnsBadRequest()
         {
             // Arrange
             var mockFile = new Mock<IFormFile>();
@@ -76,7 +78,7 @@ namespace QuizCraft.Domain.API.Tests.Unit
             mockFile.Setup(f => f.Length).Returns(1024);
 
             // Act
-            var result = await _controller.GenerateOrRetrieveQuizzes(mockFile.Object);
+            var result = await _controller.CreateQuizAsync(mockFile.Object);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);
@@ -84,66 +86,7 @@ namespace QuizCraft.Domain.API.Tests.Unit
         }
 
         [Fact]
-        public async Task GenerateOrRetrieveQuizzes_NoFile_ReturnsExistingQuizzes()
-        {
-            // Arrange
-            var expectedQuizzes = new List<QuizDto>
-            {
-                new QuizDto
-                {
-                    Id = Guid.NewGuid(),
-                    CreatedAt = DateTime.UtcNow,
-                    Questions = new List<QuestionDto>
-                    {
-                        new QuestionDto
-                        {
-                            Text = "What is the capital of France?",
-                            Answers = new List<AnswerDto>
-                            {
-                                new AnswerDto { Text = "Paris" },
-                                new AnswerDto { Text = "London" },
-                                new AnswerDto { Text = "Berlin" },
-                                new AnswerDto { Text = "Madrid" }
-                            }
-                        }
-                    }
-                },
-                new QuizDto
-                {
-                    Id = Guid.NewGuid(),
-                    CreatedAt = DateTime.UtcNow,
-                    Questions = new List<QuestionDto>
-                    {
-                        new QuestionDto
-                        {
-                            Text = "What is the largest planet?",
-                            Answers = new List<AnswerDto>
-                            {
-                                new AnswerDto { Text = "Jupiter" },
-                                new AnswerDto { Text = "Earth" },
-                                new AnswerDto { Text = "Mars" },
-                                new AnswerDto { Text = "Saturn" }
-                            }
-                        }
-                    }
-                }
-            };
-            _quizServiceMock.Setup(s => s.RetrieveQuizzesAsync())
-                            .ReturnsAsync(expectedQuizzes);
-
-            // Act
-            var result = await _controller.GenerateOrRetrieveQuizzes(null);
-
-            // Assert
-            var okResult = Assert.IsType<OkObjectResult>(result.Result);
-            var returnedQuizzes = Assert.IsAssignableFrom<IEnumerable<QuizDto>>(okResult.Value);
-            Assert.Equal(2, returnedQuizzes.Count());
-            var expectedGuid = returnedQuizzes.First().Id;
-            Assert.Equal(expectedGuid.ToString(), returnedQuizzes.First().Id.ToString());
-        }
-
-        [Fact]
-        public async Task GenerateOrRetrieveQuizzes_EmptyFile_ReturnsBadRequest()
+        public async Task CreateQuizAsync_EmptyFile_ReturnsBadRequest()
         {
             // Arrange
             var mockFile = new Mock<IFormFile>();
@@ -151,7 +94,7 @@ namespace QuizCraft.Domain.API.Tests.Unit
             mockFile.Setup(f => f.Length).Returns(0);
 
             // Act
-            var result = await _controller.GenerateOrRetrieveQuizzes(mockFile.Object);
+            var result = await _controller.CreateQuizAsync(mockFile.Object);
 
             // Assert
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result.Result);

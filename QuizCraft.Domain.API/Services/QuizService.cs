@@ -37,7 +37,7 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         return quiz;
     }
 
-    public IEnumerable<QuizDto> RetrieveQuizzes()
+    public Task<IEnumerable<QuizDto>> RetrieveQuizzes()
     {       
         var quizzes = repository.RetrieveQuizzes();
         var data = new List<QuizDto>();
@@ -55,9 +55,16 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
             // 3. Property usage in struct
             // 9. LINQ to Objects usage (methods or queries)
-            data.Add(quizzes.Where(quiz => quizScore.Score >= 50 && quiz.Id == quizScore.QuizId).First());
+            var matchedQuiz = quizzes
+                .Where(quiz => quizScore.Score >= 10 && quiz.Id == quizScore.QuizId)
+                .FirstOrDefault();
+
+            if (matchedQuiz != null)
+            {
+                data.Add(matchedQuiz);
+            }
         }
 
-        return data;
+        return Task.FromResult<IEnumerable<QuizDto>>(data);
     }
 }
