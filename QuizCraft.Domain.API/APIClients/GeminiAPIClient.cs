@@ -7,17 +7,11 @@ public interface IGeminiAPIClient
     Task<Output> PostAsync(string prompt);
 }
 
-public class GeminiAPIClient : IGeminiAPIClient
+public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient) : IGeminiAPIClient
 {   
-    private readonly string APIKey;
+    private readonly string APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new NotImplementedException();
     private readonly JsonSerializerOptions jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
-    private readonly HttpClient httpClient;
-
-    public GeminiAPIClient(IConfiguration configuration, HttpClient httpClient)
-    {
-        APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new NotImplementedException(); // Ideally, we create our own exception class to inform the user about invalid configuration.
-        this.httpClient = httpClient;
-    }
+    private readonly HttpClient httpClient = httpClient;
 
     public async Task<Output> PostAsync(string prompt)
     {

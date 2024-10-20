@@ -18,6 +18,14 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         return result.Entity;
     }
 
+    public IEnumerable<QuizDto> RetrieveQuizzes()
+    {
+        var data = context.Quizzes
+            .ProjectTo<QuizDto>(mapper.ConfigurationProvider);
+
+        return data;
+    }
+
     public QuizDto? RetrieveQuizById(Guid id)
     {
         var data = context.Quizzes
@@ -28,10 +36,21 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         return data;
     }
 
-    public IEnumerable<QuizDto> RetrieveQuizzes()
+    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId)
     {
-        var data = context.Quizzes
-            .ProjectTo<QuizDto>(mapper.ConfigurationProvider);
+        var data = context.Questions
+            .Where(question => question.QuizId == quizId)
+            .ProjectTo<QuestionDto>(mapper.ConfigurationProvider);
+
+        return data;
+    }
+
+    public AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId)
+    {
+        var data = context.Answers
+            .Where(answer => answer.IsCorrect && answer.QuestionId == questionId && answer.Question.QuizId == quizId)
+            .ProjectTo<AnswerDto>(mapper.ConfigurationProvider)
+            .FirstOrDefault();
 
         return data;
     }

@@ -15,15 +15,27 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         return Ok(await quizService.CreateQuizAsync(source));
     }
 
+    [HttpGet("/quizzes")]
+    public ActionResult<IEnumerable<QuizDto>> GetQuizzes()
+    {
+        return Ok(quizService.RetrieveQuizzes());
+    }
+
     [HttpGet("/quizzes/{id}")]
     public ActionResult<QuizDto> GetQuizById(Guid id)
     {
         return Ok(quizService.RetrieveQuizById(id));
     }
 
-    [HttpGet("/quizzes")]
-    public ActionResult<IEnumerable<QuizDto>> GetQuizzes()
+    [HttpGet("/quizzes/{id}/questions")]
+    public ActionResult<QuizDto> GetQuestions(Guid id)
     {
-        return Ok(quizService.RetrieveQuizzes());
+        return Ok(quizService.RetrieveQuestions(id));
+    }
+
+    [HttpPost("/quizzes/{quizId}/questions/{questionId}")]
+    public ActionResult<AnswerValidationDto> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
+    {
+        return Ok(quizService.ValidateAnswer(quizId, questionId, inputDto));
     }
 }
