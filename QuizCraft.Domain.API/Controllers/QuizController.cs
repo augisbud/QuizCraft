@@ -28,7 +28,7 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     }
 
     [HttpGet("/quizzes/{id}/questions")]
-    public ActionResult<QuizDto> GetQuestions(Guid id)
+    public ActionResult<IEnumerable<QuestionDto>> GetQuestions(Guid id)
     {
         return Ok(quizService.RetrieveQuestions(id));
     }
