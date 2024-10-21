@@ -1,0 +1,18 @@
+.quiz-navbar {
+    margin-top: 2px;
+    justify-content: space-between;
+    padding: 10px 20px;
+    background-color: #f8f9fa;
+}
+
+.navbarContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    z-index: 1;
+  }
+
+.text {
+    color: black;
+}

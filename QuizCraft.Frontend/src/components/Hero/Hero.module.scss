@@ -1,0 +1,14 @@
+.hero {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 90vh; 
+    text-align: center; 
+    flex-direction: column; 
+    margin: 0; 
+}
+
+h1, h2 {
+    margin: 0; 
+    padding: 0;
+}

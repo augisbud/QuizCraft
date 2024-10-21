@@ -1,56 +1,22 @@
-import { useState, ChangeEvent, FormEvent } from 'react';
-import styles from './App.module.scss';
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { Home } from "./pages/Home";
+import { SignIn } from "./pages/SignIn/SignIn";
+import { Quizzes } from "./pages/Quizzes/Quizzes";
+import { CreateQuiz } from "./pages/CreateQuiz/CreateQuiz";
+import { Quiz } from "./pages/SelectedQuiz/Quiz";
+import { Results } from "./pages/Results/Results";
 
 export const App = () => {
-    // Update state to specify that file can be `File` or `null`
-    const [file, setFile] = useState<File | null>(null);
-
-    // Type the event as `ChangeEvent<HTMLInputElement>`
-    const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-        if (event.target.files) {
-            setFile(event.target.files[0]);  // Ensure file is not null
-        }
-    };
-
-    // Type the submit event as `FormEvent<HTMLFormElement>`
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-
-        if (!file) {
-            alert('Please select a file first.');
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append('file', file);
-
-        try {
-            const response = await fetch('https://localhost:8080/upload', {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                const message = await response.text();
-                alert(message);
-            } else {
-                alert('File upload failed.');
-            }
-        } catch (error) {
-            console.error('Error during file upload:', error);
-            alert('An error occurred.');
-        }
-    };
-
-    return (
-        <div className={styles.wrapper}>
-            <h1 className={styles.title}>Upload a File</h1>
-            <form onSubmit={handleSubmit}>
-                <input type="file" onChange={handleFileChange} />
-                <button className={styles.button} type="submit">Upload</button>
-            </form>
-        </div>
-    );
-}
-
-export default App;
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/signin" element={<SignIn />} />
+        <Route path="/quizzes" element={<Quizzes />} />
+        <Route path="/create-quiz" element={<CreateQuiz />} />
+        <Route path="/quizzes/:quizId" element={<Quiz />} />
+        <Route path="/results" element={<Results />} />
+      </Routes>
+    </BrowserRouter>
+  );
+};
