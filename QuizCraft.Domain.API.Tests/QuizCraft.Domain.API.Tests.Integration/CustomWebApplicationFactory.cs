@@ -24,21 +24,21 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 ])
                 .Build()
         );
-        
+
         builder.ConfigureTestServices(services =>
         {
             var dbContextDescriptor = services.SingleOrDefault(
                 d => d.ServiceType ==
                     typeof(DbContextOptions<QuizzesDbContext>));
 
-            if(dbContextDescriptor != null)
+            if (dbContextDescriptor != null)
                 services.Remove(dbContextDescriptor);
 
             var dbConnectionDescriptor = services.SingleOrDefault(
                 d => d.ServiceType ==
                     typeof(DbConnection));
 
-            if(dbConnectionDescriptor != null)
+            if (dbConnectionDescriptor != null)
                 services.Remove(dbConnectionDescriptor);
 
             services.AddSingleton<DbConnection>(container =>
@@ -59,11 +59,11 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 d => d.ServiceType == typeof(IGeminiAPIClient)
             );
 
-            if(geminiAPIClientDescriptor != null)
+            if (geminiAPIClientDescriptor != null)
                 services.Remove(geminiAPIClientDescriptor);
 
             services.AddHttpClient<IGeminiAPIClient, GeminiAPIClient>(
-                client => { client.BaseAddress = new Uri("http://localhost:8080/geminiAPI"); } 
+                client => { client.BaseAddress = new Uri("http://localhost:8080/geminiAPI"); }
             );
         });
     }

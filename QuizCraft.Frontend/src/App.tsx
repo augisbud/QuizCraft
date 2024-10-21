@@ -1,18 +1,18 @@
 import { useState, ChangeEvent, FormEvent } from 'react';
 import styles from './App.module.scss';
+import { QuizDto } from './types';
 
+// 1. Application can be interacted with using *some* sort of interface
 export const App = () => {
-    // Update state to specify that file can be `File` or `null`
     const [file, setFile] = useState<File | null>(null);
+    const [quiz, setQuiz] = useState<QuizDto | null>(null);
 
-    // Type the event as `ChangeEvent<HTMLInputElement>`
     const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
         if (event.target.files) {
-            setFile(event.target.files[0]);  // Ensure file is not null
+            setFile(event.target.files[0]);
         }
     };
 
-    // Type the submit event as `FormEvent<HTMLFormElement>`
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
 
@@ -25,16 +25,17 @@ export const App = () => {
         formData.append('file', file);
 
         try {
-            const response = await fetch('https://localhost:8080/upload', {
+            const quizzesResponse = await fetch('https://localhost:8080/quizzes', {
                 method: 'POST',
                 body: formData,
             });
 
-            if (response.ok) {
-                const message = await response.text();
-                alert(message);
+            if (quizzesResponse.ok) {
+                const quizData: QuizDto = await quizzesResponse.json();
+                setQuiz(quizData);
             } else {
-                alert('File upload failed.');
+                const errorText = await quizzesResponse.text();
+                alert(`Quiz generation failed: ${errorText}`);
             }
         } catch (error) {
             console.error('Error during file upload:', error);
@@ -49,8 +50,19 @@ export const App = () => {
                 <input type="file" onChange={handleFileChange} />
                 <button className={styles.button} type="submit">Upload</button>
             </form>
+
+            {quiz && (
+                <div className={styles.quiz}>
+                    <h2>{quiz.questions[0].text}</h2> {}
+                    <ul>
+                        {quiz.questions[0].answers.map((answer, index) => (
+                            <li key={index}>{answer.text}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
         </div>
     );
-}
+};
 
 export default App;

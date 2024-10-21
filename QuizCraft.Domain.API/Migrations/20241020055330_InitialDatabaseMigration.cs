@@ -15,7 +15,9 @@ namespace QuizCraft.Domain.API.Migrations
                 name: "Quizzes",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false)
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Title = table.Column<string>(type: "text", nullable: false),
+                    Category = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -28,7 +30,7 @@ namespace QuizCraft.Domain.API.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Text = table.Column<string>(type: "text", nullable: false),
-                    QuizId = table.Column<Guid>(type: "uuid", nullable: true)
+                    QuizId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -37,7 +39,8 @@ namespace QuizCraft.Domain.API.Migrations
                         name: "FK_Questions_Quizzes_QuizId",
                         column: x => x.QuizId,
                         principalTable: "Quizzes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -45,8 +48,9 @@ namespace QuizCraft.Domain.API.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Text = table.Column<string>(type: "text", nullable: false)
+                    Text = table.Column<string>(type: "text", nullable: false),
+                    IsCorrect = table.Column<bool>(type: "boolean", nullable: false),
+                    QuestionId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
                 {

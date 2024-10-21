@@ -28,6 +28,9 @@ namespace QuizCraft.Domain.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
 
@@ -48,7 +51,7 @@ namespace QuizCraft.Domain.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("QuizId")
+                    b.Property<Guid>("QuizId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Text")
@@ -68,6 +71,13 @@ namespace QuizCraft.Domain.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Category")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.ToTable("Quizzes");
@@ -86,9 +96,13 @@ namespace QuizCraft.Domain.API.Migrations
 
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.Question", b =>
                 {
-                    b.HasOne("QuizCraft.Domain.API.Entities.Quiz", null)
+                    b.HasOne("QuizCraft.Domain.API.Entities.Quiz", "Quiz")
                         .WithMany("Questions")
-                        .HasForeignKey("QuizId");
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
                 });
 
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.Question", b =>

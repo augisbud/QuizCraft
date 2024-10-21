@@ -9,33 +9,57 @@ public interface IGeminiAPIClient
 
 public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient) : IGeminiAPIClient
 {   
-    private readonly string APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new NotImplementedException(); // Ideally, we create our own exception class to inform the user about invalid configuration.
+    private readonly string APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new NotImplementedException();
     private readonly JsonSerializerOptions jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
+    private readonly HttpClient httpClient = httpClient;
 
     public async Task<Output> PostAsync(string prompt)
     {
         var input = new Input()
         {
-            Contents = [
+            Contents =
+            [
                 new()
                 {
-                    Parts = [
-                        new()
-                        {
-                            Text = prompt
-                        }
+                    Parts =
+                    [
+                        new(prompt)
                     ],
-                    Role = null
+                    Role = "user" // default role
                 }
             ]
         };
 
-        var response = await httpClient.PostAsJsonAsync($"{httpClient.BaseAddress}?key={APIKey}", input);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            var response = await httpClient.PostAsJsonAsync($"{httpClient.BaseAddress}?key={APIKey}", input);
 
-        var result = JsonSerializer.Deserialize<Output>(await response.Content.ReadAsStringAsync(), jsonSerializerOptions);
-    
-        return result!;
+            // Check if the response indicates failure and throw HttpRequestException
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.StatusCode}).");
+            }
+
+            var jsonResponse = await response.Content.ReadAsStringAsync();
+            //Console.WriteLine($"Gemini API Response: {jsonResponse}");
+
+            var result = JsonSerializer.Deserialize<Output>(jsonResponse, jsonSerializerOptions);
+
+            if (result == null || result.Candidates.Count == 0)
+            {
+                throw new Exception("Received an empty or invalid response from the Gemini API.");
+            }
+
+            return result;
+        }
+        catch (HttpRequestException ex)
+        {
+            throw new HttpRequestException("Error while calling Gemini API: " + ex.Message, ex);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception("An unexpected error occurred: " + ex.Message, ex);
+        }
     }
 }
 
@@ -54,7 +78,7 @@ public class Candidate
 {
     public required Content Content { get; set; }
     public required string FinishReason { get; set; }
-    public required int Index { get; set; }
+    public int? Index { get; set; }
     public required List<SafetyRating> SafetyRatings { get; set; }
 }
 
@@ -77,7 +101,8 @@ public class SafetyRating
     public required string Probability { get; set; }
 }
 
-public class Part
+// 2. Creating and using your own struct
+public struct Part(string text)
 {
-    public required string Text { get; set; }
+    public string Text { get; set; } = text;
 }
