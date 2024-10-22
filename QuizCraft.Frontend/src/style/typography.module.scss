@@ -9,18 +9,18 @@ body {
 }
 
 %h1 {
-    font-size: $font-size-large;
+    font-size: 96px;
     color: $primary-color;
 }
 
 %h2 {
-    font-size: $font-size-large;
+    font-size: 96px;
+    font-weight: 300;
     color: $secondary-color;
 }
 
 %h3 {
-    font-size: $font-size-small;
-    font-family: $font-family;
+    font-size: 48px;
     font-weight: normal;
     color: $primary-color;
 }
