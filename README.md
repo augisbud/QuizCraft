@@ -22,8 +22,16 @@ This solution allows users to upload a summary of a given topic, whether it is a
 
 ### Deployment on a Local Machine
 Checkout the Github Repository
+
+Setup PostgreSQL in Docker using:
+```
+docker run -itd -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -p 5432:5432 --name postgresql postgres
+```
+
 Set Gemini API key as an Environment Variable in your machine using the given key: GeminiAPIKey
+
 Then run the following commands
+
 Using .NET 8 SDK:
 ```
 cd QuizCraft.Domain.API

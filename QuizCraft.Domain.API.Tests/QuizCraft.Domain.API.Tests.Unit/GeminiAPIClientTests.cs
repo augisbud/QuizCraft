@@ -33,7 +33,7 @@ public class GeminiAPIClientTests
     }
 
     [Fact]
-    public async void PostAsync_ValidResponse_ReturnsOutput()
+    public async Task PostAsync_ValidResponse_ReturnsOutput()
     {
         // Arrange
         var prompt = "Test prompt";
@@ -86,7 +86,7 @@ public class GeminiAPIClientTests
     }
 
     [Fact]
-    public async void PostAsync_InvalidResponse_ThrowsException()
+    public async Task PostAsync_InvalidResponse_ThrowsException()
     {
         // Arrange
         var prompt = "Test prompt";

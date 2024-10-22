@@ -1,6 +1,4 @@
 namespace QuizCraft.Domain.API.Models;
 
-public class AnswerDto
-{
-    public required string Text { get; set; }
-}
+// 2. Creating and using your own record
+public record AnswerDto(string Text, bool IsCorrect);
