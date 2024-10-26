@@ -6,15 +6,16 @@ using QuizCraft.Domain.API.Data;
 using QuizCraft.Domain.API.Repositories;
 using QuizCraft.Domain.API.Profiles;
 using AutoMapper.EquivalencyExpression;
+using QuizCraft.Domain.API.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowLocalhost",
-    builder =>
+    options.AddPolicy("AllowFrontend",
+    b =>
     {
-        builder.WithOrigins("http://localhost:3000")
+        b.WithOrigins(builder.Configuration["Frontend:Url"]!)
                .AllowAnyMethod()
                .AllowAnyHeader();
     });

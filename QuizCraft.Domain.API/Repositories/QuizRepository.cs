@@ -36,11 +36,10 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         return data;
     }
 
-    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId)
+    public IEnumerable<Question> RetrieveQuestions(Guid quizId)
     {
         var data = context.Questions
-            .Where(question => question.QuizId == quizId)
-            .ProjectTo<QuestionDto>(mapper.ConfigurationProvider);
+            .Where(question => question.QuizId == quizId);
 
         return data;
     }

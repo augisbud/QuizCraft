@@ -15,6 +15,7 @@ public class Answer
 
     [Required]
     public Guid QuestionId { get; set; }
+    
 
     public Question Question { get; set; } = null!;
 }

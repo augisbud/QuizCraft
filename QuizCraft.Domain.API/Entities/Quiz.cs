@@ -16,6 +16,7 @@ public class Quiz
 
     [Required]
     public DateTime CreatedAt { get; } = DateTime.UtcNow;
+    
 
     public IEnumerable<Question> Questions { get; set; } = [];
 }

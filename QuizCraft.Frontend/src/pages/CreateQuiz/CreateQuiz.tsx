@@ -3,8 +3,12 @@ import { Navbar } from "../../components/Navbar/Navbar";
 import { Button, styled } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import styles from "./CreateQuiz.module.scss";
+import { useNavigate } from "react-router-dom";
+import { QuizDto } from "../../utils/QuizCraftAPIClient";
 
 export const CreateQuiz = () => {
+  const navigate = useNavigate();
+
   const [file, setFile] = useState<File | null>(null);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
@@ -26,14 +30,15 @@ export const CreateQuiz = () => {
     formData.append("file", fileToUpload);
 
     try {
-      const response = await fetch("https://localhost:8080/upload", {
+      const response = await fetch("https://localhost:8080/quizzes", {
         method: "POST",
         body: formData,
       });
 
       if (response.ok) {
-        const message = await response.text();
-        alert(message);
+        const quiz = (await response.json()) as QuizDto;
+
+        navigate(`/quizzes/${quiz.id}`);
       } else {
         alert("File upload failed.");
       }

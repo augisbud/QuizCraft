@@ -15,38 +15,53 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 {
     public async Task<QuizDto> CreateQuizAsync(string source)
     {
-        var response = await geminiAPIClient.PostAsync(GeminiAPITemplates.GeneratePrompt(source));
+        // 4. Named and optional argument usage
+        var response = await geminiAPIClient.PostAsync(GeminiAPITemplates.GeneratePrompt(numberOfQuestions: 10, source: source));
 
         var jsonString = response.Candidates[0].Content.Parts[0].Text.CleanJsonString();
 
         var data = JsonSerializer.Deserialize<QuizDtoForCreation>(jsonString) ?? throw new InsufficientDataException();
 
-        var quiz = await repository.CreateQuizAsync(mapper.Map<Quiz>(data));
+        var mappedData = mapper.Map<Quiz>(data);
+
+        var quiz = await repository.CreateQuizAsync(mappedData);
 
         return mapper.Map<QuizDto>(quiz);
     }
 
     public QuizDto RetrieveQuizById(Guid id)
     {
-        var quiz = repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
+        // 8. Boxing and unboxing
+        object boxedQuiz = repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
+        var unboxedQuiz = (QuizDto) boxedQuiz;
 
-        return quiz;
+        return unboxedQuiz;
     }
 
     public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId)
     {
-        var questions = repository.RetrieveQuestions(quizId);
-
         // TODO: throw error, when questions are not found for a given quiz.
+        var questions = repository.RetrieveQuestions(quizId);
+        
+        // 8. Boxing and unboxing
+        var boxedQuestions = (object) questions;
+        var unboxedQuestions = (IEnumerable<Question>) boxedQuestions;
 
-        return questions;
+        // 6. Iterating through collection the right way
+        var data = unboxedQuestions.Select(q => new QuestionDto
+        {
+            Id = q.Id,
+            Text = q.Text,
+            Answers = q.Answers.Select(a => a.Text).ToList()
+        });
+
+        return data;
     }
 
     public AnswerValidationDto ValidateAnswer(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto)
     {
-        var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
-
         // TODO: store user progress.
+        var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
 
         return new()
         {
