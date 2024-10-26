@@ -6,6 +6,7 @@ import { CreateQuiz } from "./pages/CreateQuiz/CreateQuiz";
 import { Quiz } from "./pages/SelectedQuiz/Quiz";
 import { Results } from "./pages/Results/Results";
 
+// 1. Application can be interacted with using *some* sort of interface
 export const App = () => {
   return (
     <BrowserRouter>

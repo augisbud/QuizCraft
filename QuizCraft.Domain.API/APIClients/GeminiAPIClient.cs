@@ -23,7 +23,7 @@ public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient
                 {
                     Parts =
                     [
-                        new(prompt)
+                        new() { Text = prompt }
                     ],
                     Role = "user" // default role
                 }
@@ -34,14 +34,12 @@ public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient
         {
             var response = await httpClient.PostAsJsonAsync($"{httpClient.BaseAddress}?key={APIKey}", input);
 
-            // Check if the response indicates failure and throw HttpRequestException
             if (!response.IsSuccessStatusCode)
             {
                 throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.StatusCode}).");
             }
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            //Console.WriteLine($"Gemini API Response: {jsonResponse}");
 
             var result = JsonSerializer.Deserialize<Output>(jsonResponse, jsonSerializerOptions);
 
@@ -102,7 +100,21 @@ public class SafetyRating
 }
 
 // 2. Creating and using your own struct
-public struct Part(string text)
+public struct Part
 {
-    public string Text { get; set; } = text;
+    private string _text;
+
+    // 3. Property usage in struct
+    public required string Text
+    {
+        readonly get { return _text; }
+        set
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new ArgumentException("Text cannot be null or empty");
+            }
+            _text = value;
+        }
+    }
 }
