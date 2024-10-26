@@ -1,0 +1,63 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  background-color: #f8f9fa;
+  position: relative;
+}
+
+.navbarContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  z-index: 1;
+}
+
+.burger {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+}
+
+.userIcon {
+  img {
+    width: 25px;
+    height: 25px;
+  }
+}
+
+.sideMenu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 200px;
+  background-color: #4f8f8f;
+  display: none;
+  padding: 10px;
+  transition: 0.3s ease;
+
+  &Open {
+    display: block;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin: 10px 0;
+      color: white;
+      cursor: pointer;
+      font-size: 18px;
+    }
+  }
+}
+
+.navbarLink {
+  font-size: 18px;
+  color: white;
+  text-decoration: none;
+}
