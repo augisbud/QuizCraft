@@ -309,9 +309,9 @@ export interface IAnswerDto {
 }
 
 export class AnswerValidationDto implements IAnswerValidationDto {
-    selected?: string | undefined;
-    isCorrect?: boolean;
-    correctAnswer?: AnswerDto;
+    selected!: string;
+    isCorrect!: boolean;
+    correctAnswer!: AnswerDto;
 
     constructor(data?: IAnswerValidationDto) {
         if (data) {
@@ -320,13 +320,16 @@ export class AnswerValidationDto implements IAnswerValidationDto {
                     (<any>this)[property] = (<any>data)[property];
             }
         }
+        if (!data) {
+            this.correctAnswer = new AnswerDto();
+        }
     }
 
     init(_data?: any) {
         if (_data) {
             this.selected = _data["selected"];
             this.isCorrect = _data["isCorrect"];
-            this.correctAnswer = _data["correctAnswer"] ? AnswerDto.fromJS(_data["correctAnswer"]) : <any>undefined;
+            this.correctAnswer = _data["correctAnswer"] ? AnswerDto.fromJS(_data["correctAnswer"]) : new AnswerDto();
         }
     }
 
@@ -347,9 +350,9 @@ export class AnswerValidationDto implements IAnswerValidationDto {
 }
 
 export interface IAnswerValidationDto {
-    selected?: string | undefined;
-    isCorrect?: boolean;
-    correctAnswer?: AnswerDto;
+    selected: string;
+    isCorrect: boolean;
+    correctAnswer: AnswerDto;
 }
 
 export class AnswerValidationInputDto implements IAnswerValidationInputDto {
@@ -412,9 +415,9 @@ export enum Category {
 }
 
 export class QuestionDto implements IQuestionDto {
-    id?: string;
-    text?: string | undefined;
-    answers?: string[] | undefined;
+    id!: string;
+    text!: string;
+    answers!: string[];
 
     constructor(data?: IQuestionDto) {
         if (data) {
@@ -422,6 +425,9 @@ export class QuestionDto implements IQuestionDto {
                 if (data.hasOwnProperty(property))
                     (<any>this)[property] = (<any>data)[property];
             }
+        }
+        if (!data) {
+            this.answers = [];
         }
     }
 
@@ -458,17 +464,17 @@ export class QuestionDto implements IQuestionDto {
 }
 
 export interface IQuestionDto {
-    id?: string;
-    text?: string | undefined;
-    answers?: string[] | undefined;
+    id: string;
+    text: string;
+    answers: string[];
 }
 
 export class QuizDto implements IQuizDto {
-    id?: string;
-    createdAt?: Date;
-    title?: string | undefined;
-    category?: Category;
-    questionCount?: number;
+    id!: string;
+    createdAt!: Date;
+    title!: string;
+    category!: Category;
+    questionCount!: number;
 
     constructor(data?: IQuizDto) {
         if (data) {
@@ -508,11 +514,11 @@ export class QuizDto implements IQuizDto {
 }
 
 export interface IQuizDto {
-    id?: string;
-    createdAt?: Date;
-    title?: string | undefined;
-    category?: Category;
-    questionCount?: number;
+    id: string;
+    createdAt: Date;
+    title: string;
+    category: Category;
+    questionCount: number;
 }
 
 export class ApiException extends Error {
