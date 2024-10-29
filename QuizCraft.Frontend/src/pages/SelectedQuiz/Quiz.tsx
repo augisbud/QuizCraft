@@ -7,13 +7,20 @@ import {
   FormLabel,
   Button,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { Navbar } from "../../components/Navbar/Navbar";
 import styles from "./Quiz.module.scss";
 import { QuestionDto, QuizDto, AnswerValidationInputDto, AnswerDto } from "../../utils/QuizCraftAPIClient";
 import { client } from "../../utils/Client";
 
 export const Quiz = () => {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!sessionStorage.getItem("token"))
+      navigate("/signin");  
+  }, [navigate])
+
   const { quizId } = useParams<{ quizId: string }>();
 
   const [quiz, setQuiz] = useState<QuizDto>();
@@ -32,13 +39,15 @@ export const Quiz = () => {
       setQuiz(quizData);
     };
 
-    fetchQuiz();
+    if(sessionStorage.getItem("token"))
+      fetchQuiz();
   }, [quizId]);
 
   useEffect(() => {
     const fetchQuestions = async () => {
       if (quizId === undefined) return;
-
+      if(!sessionStorage.getItem("token")) return;
+      
       const questionsData = await client.questionsAll(quizId);
 
       setQuestions(questionsData);

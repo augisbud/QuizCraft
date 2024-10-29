@@ -1,12 +1,18 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button, TextField } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Navbar } from "../../components/Navbar/Navbar";
 import styles from "./Results.module.scss";
 
 export const Results = () => {
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!sessionStorage.getItem("token"))
+      navigate("/signin");  
+  }, [navigate])
+
   const { correctAnswers, totalQuestions } = location.state;
   const [comment, setComment] = useState<string>("");
 

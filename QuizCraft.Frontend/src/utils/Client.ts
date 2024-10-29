@@ -2,7 +2,14 @@ import { Client } from "./QuizCraftAPIClient";
 
 const httpClient = {
     fetch: (url: RequestInfo, init?: RequestInit): Promise<Response> => {
-        return fetch(url, init);
+        const token = sessionStorage.getItem("token");
+        
+        const headers = new Headers(init?.headers || {});
+
+        if (token)
+            headers.set("Authorization", `Bearer ${token}`);
+        
+        return fetch(url, { ...init, headers });
     }
 };
 

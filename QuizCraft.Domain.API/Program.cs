@@ -7,20 +7,45 @@ using QuizCraft.Domain.API.Repositories;
 using QuizCraft.Domain.API.Profiles;
 using AutoMapper.EquivalencyExpression;
 using QuizCraft.Domain.API.Filters;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowFrontend",
-    b =>
+builder.Services
+    .AddAuthentication(options =>
     {
-        b.WithOrigins(builder.Configuration["Frontend:Url"]!)
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddGoogle(options =>
+    {
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"]!;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"]!;
+    })
+    .AddJwtBearer(options =>
+    {
+        options.Authority = "https://accounts.google.com";
+        options.Audience = builder.Configuration["Authentication:Google:ClientId"]!;
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = "https://accounts.google.com",
+            ValidAudience = builder.Configuration["Authentication:Google:ClientId"]!,
+        };
     });
 
-});
+builder.Services
+    .AddCors(options =>
+    {
+        options.AddPolicy("AllowFrontend",
+        b =>
+        {
+            b.WithOrigins(builder.Configuration["Frontend:Url"]!)
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+
+    });
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
@@ -49,7 +74,8 @@ builder.Services.AddHttpClient<IGeminiAPIClient, GeminiAPIClient>(
     }
 );
 
-builder.Services.AddAutoMapper(cfg => {
+builder.Services.AddAutoMapper(cfg =>
+{
     cfg.AddProfile<QuizzesProfiles>();
     cfg.AddCollectionMappers();
 });
@@ -64,6 +90,9 @@ app.UseSwagger();
 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuizCraft API v1"));
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 
