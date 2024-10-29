@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Services;
@@ -7,6 +8,7 @@ namespace QuizCraft.Domain.API.Controllers;
 [ApiController]
 public class QuizController(IQuizService quizService, IFileProcessingService fileProcessingService) : ControllerBase
 {
+    [Authorize]
     [HttpPost("/quizzes")]
     public async Task<ActionResult<QuizDto>> CreateQuizAsync([FromForm] IFormFile file)
     {
@@ -25,6 +27,7 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         return Ok(result);
     }
 
+    [Authorize]
     [HttpGet("/quizzes/{id}")]
     public ActionResult<QuizDto> GetQuizById(Guid id)
     {
@@ -33,6 +36,7 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         return Ok(result);
     }
 
+    [Authorize]
     [HttpGet("/quizzes/{id}/questions")]
     public ActionResult<IEnumerable<QuestionDto>> GetQuestions(Guid id)
     {
@@ -41,6 +45,7 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         return Ok(result);
     }
 
+    [Authorize]
     [HttpPost("/quizzes/{quizId}/questions/{questionId}")]
     public ActionResult<AnswerValidationDto> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
     {

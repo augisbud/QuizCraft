@@ -1,4 +1,4 @@
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { Navbar } from "../../components/Navbar/Navbar";
 import { Button, styled } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
@@ -8,6 +8,11 @@ import { QuizDto } from "../../utils/QuizCraftAPIClient";
 
 export const CreateQuiz = () => {
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if(!sessionStorage.getItem("token"))
+      navigate("/signin");  
+  }, [navigate])
 
   const [file, setFile] = useState<File | null>(null);
 

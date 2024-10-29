@@ -80,6 +80,8 @@ jobs:
             docker stop backend || true
             docker rm backend || true
             docker run -d --name backend --network internal --restart unless-stopped -p 8080:8080 \
+              -e Authentication__Google__ClientId="${{ secrets.GOOGLE_CLIENT_ID }}" \
+              -e Authentication__Google__ClientSecret="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
               -e ConnectionStrings__DefaultConnection="${{ secrets.CONNECTION_STRING }}" \
               -e GeminiAPIKey="${{ secrets.GEMINI_API_KEY }}" \
               -e Frontend__Url="${{ secrets.FRONTEND_URL }}" \
