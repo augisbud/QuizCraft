@@ -40,6 +40,7 @@ export const Quiz = () => {
       if (quizId === undefined) return;
 
       const questionsData = await client.questionsAll(quizId);
+
       setQuestions(questionsData);
       setLoading(false);
     };
