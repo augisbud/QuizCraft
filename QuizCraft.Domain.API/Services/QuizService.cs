@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Text.Json;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using QuizCraft.Domain.API.APIClients;
 using QuizCraft.Domain.API.Constants;
 using QuizCraft.Domain.API.Entities;
@@ -8,10 +9,11 @@ using QuizCraft.Domain.API.Exceptions;
 using QuizCraft.Domain.API.Extensions;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Repositories;
+using QuizCraft.Domain.API.Data;
 
 namespace QuizCraft.Domain.API.Services;
 
-public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuizRepository repository) : IQuizService
+public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuizRepository repository, QuizzesDbContext context) : IQuizService
 {
     public async Task<QuizDto> CreateQuizAsync(string source)
     {
@@ -76,5 +78,53 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         var quizzes = repository.RetrieveQuizzes();
 
         return quizzes;
+    }
+
+    public async Task<AnswerValidationDto> ValidateAnswerAndTrackAttemptAsync(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto, string userEmail)
+    {
+        var answer = await context.Answers
+            .FirstOrDefaultAsync(a => a.QuestionId == questionId && a.Question.QuizId == quizId && a.Text == inputDto.Text);
+
+        if (answer == null)
+        {
+            throw new AnswerNotFoundException(questionId);
+        }
+
+        var attempt = new QuizAnswerAttempt
+        {
+            QuizId = quizId,
+            QuestionId = questionId,
+            AttemptedAnswer = inputDto.Text,
+            IsCorrect = answer.IsCorrect,
+            UserEmail = userEmail,
+            AttemptedAt = DateTime.UtcNow
+        };
+
+        context.QuizAnswerAttempts.Add(attempt);
+        await context.SaveChangesAsync();
+
+        var correctAnswerDto = new AnswerDto(answer.Text, answer.IsCorrect);
+
+        return new AnswerValidationDto
+        {
+            Selected = inputDto.Text,
+            IsCorrect = answer.IsCorrect,
+            CorrectAnswer = correctAnswerDto
+        };
+    }
+
+    public async Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt)
+    {
+        return await repository.CreateQuizAnswerAttemptAsync(attempt);
+    }
+
+    public IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempts(Guid quizId)
+    {
+        return repository.RetrieveQuizAnswerAttempts(quizId);
+    }
+
+    public IEnumerable<QuizAnswerAttempt> RetrieveAttemptsForQuestion(Guid quizId, Guid questionId)
+    {
+        return repository.RetrieveAttemptsForQuestion(quizId, questionId);
     }
 }

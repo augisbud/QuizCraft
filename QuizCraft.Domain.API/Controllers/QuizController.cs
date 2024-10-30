@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace QuizCraft.Domain.API.Controllers;
 
@@ -47,10 +48,19 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpPost("/quizzes/{quizId}/questions/{questionId}")]
-    public ActionResult<AnswerValidationDto> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
+    public async Task<ActionResult<AnswerValidationDto>> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
     {
-        var result = quizService.ValidateAnswer(quizId, questionId, inputDto);
+        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+        var userEmail = DecodeJwtToken(token);
 
+        var result = await quizService.ValidateAnswerAndTrackAttemptAsync(quizId, questionId, inputDto, userEmail);
         return Ok(result);
+    }
+
+    private string DecodeJwtToken(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+        return jwtToken.Claims.First(claim => claim.Type == "email").Value;
     }
 }

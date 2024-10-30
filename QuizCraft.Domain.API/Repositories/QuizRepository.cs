@@ -53,4 +53,28 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
 
         return data;
     }
+
+    public async Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt)
+    {
+        var result = await context.QuizAnswerAttempts.AddAsync(attempt);
+        await context.SaveChangesAsync();
+        return result.Entity;
+    }
+
+    public IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempts(Guid quizId)
+    {
+        var attempts = context.QuizAnswerAttempts
+            .Where(attempt => attempt.QuizId == quizId)
+            .Include(attempt => attempt.Question)
+            .ToList();
+        return attempts;
+    }
+
+    public IEnumerable<QuizAnswerAttempt> RetrieveAttemptsForQuestion(Guid quizId, Guid questionId)
+    {
+        var attempts = context.QuizAnswerAttempts
+            .Where(attempt => attempt.QuizId == quizId && attempt.QuestionId == questionId)
+            .ToList();
+        return attempts;
+    }
 }
