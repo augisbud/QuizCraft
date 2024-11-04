@@ -13,12 +13,14 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     [HttpPost("/quizzes")]
     public async Task<ActionResult<QuizDto>> CreateQuizAsync([FromForm] IFormFile file)
     {
-        var source = await fileProcessingService.ProcessFileAsync(file);
+        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
 
+        var source = await fileProcessingService.ProcessFileAsync(file);
         var result = await quizService.CreateQuizAsync(source);
 
         return Ok(result);
     }
+
 
     [HttpGet("/quizzes")]
     public ActionResult<IEnumerable<QuizDto>> GetQuizzes()
