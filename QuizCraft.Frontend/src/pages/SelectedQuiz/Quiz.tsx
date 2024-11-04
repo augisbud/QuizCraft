@@ -14,14 +14,14 @@ import { QuestionDto, QuizDto, AnswerValidationInputDto, AnswerDto } from "../..
 import { client } from "../../utils/Client";
 
 export const Quiz = () => {
+  const { quizId } = useParams<{ quizId: string }>();
+
   const navigate = useNavigate();
 
   useEffect(() => {
     if(!sessionStorage.getItem("token"))
-      navigate("/signin");  
-  }, [navigate])
-
-  const { quizId } = useParams<{ quizId: string }>();
+      navigate(`/signin?redirect=/quizzes/${quizId}`);  
+  }, [navigate, quizId])
 
   const [quiz, setQuiz] = useState<QuizDto>();
   const [questions, setQuestions] = useState<QuestionDto[]>([]);
