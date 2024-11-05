@@ -64,10 +64,8 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
             throw new AnswerNotFoundException(questionId);
         }
 
-        // Check if the question has already been answered
         if (!answeredQuestionIds.Contains(questionId))
         {
-            // Create and track the user's answer attempt
             var attempt = new QuizAnswerAttempt
             {
                 QuizId = quizId,
@@ -78,15 +76,12 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
                 AttemptedAt = DateTime.UtcNow
             };
 
-            // Add the attempt to the context and save changes
             context.QuizAnswerAttempts.Add(attempt);
             await context.SaveChangesAsync();
 
-            // Mark the question as answered
             answeredQuestionIds.Add(questionId);
         }
 
-        // Prepare the correct answer DTO to return
         return new AnswerValidationDto
         {
             Selected = inputDto.Text,
@@ -113,13 +108,11 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public async Task<int> GetNextUnansweredQuestionIndexAsync(Guid quizId, string userEmail)
     {
-        // Fetch all question IDs for the given quiz
         var questionIds = await context.Questions
             .Where(q => q.QuizId == quizId)
             .Select(q => q.Id)
             .ToListAsync();
 
-        // Fetch all answered question IDs for the user in the given quiz
         var answeredQuestionIds = await context.QuizAnswerAttempts
             .Where(attempt => attempt.QuizId == quizId && attempt.UserEmail == userEmail)
             .Select(attempt => attempt.QuestionId)
@@ -129,11 +122,9 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         Console.WriteLine($"Question IDs: {string.Join(", ", questionIds)}");
         Console.WriteLine($"Answered Question IDs: {string.Join(", ", answeredQuestionIds)}");
 
-        // Find the index of the next unanswered question
         var unansweredQuestionIndex = questionIds
             .FindIndex(qId => !answeredQuestionIds.Contains(qId));
 
-        // Return the index or -1 if all questions have been answered
         return unansweredQuestionIndex;
     }
 

@@ -475,6 +475,7 @@ export class QuizDto implements IQuizDto {
     title!: string;
     category!: Category;
     questionCount!: number;
+    nextUnansweredQuestionIndex?: number;
 
     constructor(data?: IQuizDto) {
         if (data) {
@@ -492,6 +493,7 @@ export class QuizDto implements IQuizDto {
             this.title = _data["title"];
             this.category = _data["category"];
             this.questionCount = _data["questionCount"];
+            this.nextUnansweredQuestionIndex = _data["nextUnansweredQuestionIndex"];
         }
     }
 
@@ -509,6 +511,7 @@ export class QuizDto implements IQuizDto {
         data["title"] = this.title;
         data["category"] = this.category;
         data["questionCount"] = this.questionCount;
+        data["nextUnansweredQuestionIndex"] = this.nextUnansweredQuestionIndex;
         return data;
     }
 }
@@ -519,6 +522,7 @@ export interface IQuizDto {
     title: string;
     category: Category;
     questionCount: number;
+    nextUnansweredQuestionIndex?: number;
 }
 
 export class ApiException extends Error {

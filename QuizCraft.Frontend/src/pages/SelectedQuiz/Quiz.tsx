@@ -36,7 +36,9 @@ export const Quiz = () => {
       if (quizId === undefined) return;
 
         const quizData = await client.quizzesGET(quizId);
-        setCurrentQuestionIndex(quizData.nextUnansweredQuestionIndex);
+        if (quizData.nextUnansweredQuestionIndex !== undefined) {
+            setCurrentQuestionIndex(quizData.nextUnansweredQuestionIndex);
+        }
 
       setQuiz(quizData);
     };
