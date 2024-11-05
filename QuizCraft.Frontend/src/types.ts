@@ -11,4 +11,5 @@ export interface QuizDto {
     id: string;
     createdAt: Date;
     questions: QuestionDto[];
+    nextUnansweredQuestionIndex: number;
 }

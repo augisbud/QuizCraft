@@ -32,12 +32,19 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpGet("/quizzes/{id}")]
-    public ActionResult<QuizDto> GetQuizById(Guid id)
+    public async Task<ActionResult<QuizDto>> GetQuizById(Guid id)
     {
-        var result = quizService.RetrieveQuizById(id);
+        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+        var userEmail = DecodeJwtToken(token);
 
-        return Ok(result);
+        var quiz = quizService.RetrieveQuizById(id);
+
+        var nextUnansweredQuestionIndex = await quizService.GetNextUnansweredQuestionIndexAsync(id, userEmail);
+        quiz.NextUnansweredQuestionIndex = nextUnansweredQuestionIndex;
+
+        return Ok(quiz);
     }
+
 
     [Authorize]
     [HttpGet("/quizzes/{id}/questions")]

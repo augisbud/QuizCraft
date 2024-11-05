@@ -15,6 +15,8 @@ namespace QuizCraft.Domain.API.Services;
 
 public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuizRepository repository, QuizzesDbContext context) : IQuizService
 {
+    private HashSet<Guid> answeredQuestionIds = new HashSet<Guid>();
+
     public async Task<QuizDto> CreateQuizAsync(string source)
     {
         // 4. Named and optional argument usage
@@ -42,35 +44,7 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId)
     {
-        // TODO: throw error, when questions are not found for a given quiz.
-        var questions = repository.RetrieveQuestions(quizId);
-        
-        // 8. Boxing and unboxing
-        var boxedQuestions = (object) questions;
-        var unboxedQuestions = (IEnumerable<Question>) boxedQuestions;
-
-        // 6. Iterating through collection the right way
-        var data = unboxedQuestions.Select(q => new QuestionDto
-        {
-            Id = q.Id,
-            Text = q.Text,
-            Answers = q.Answers.Select(a => a.Text).ToList()
-        });
-
-        return data;
-    }
-
-    public AnswerValidationDto ValidateAnswer(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto)
-    {
-        // TODO: store user progress.
-        var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
-
-        return new()
-        {
-            Selected = inputDto.Text,
-            IsCorrect = answer.Text == inputDto.Text,
-            CorrectAnswer = answer
-        };
+        return repository.RetrieveQuestions(quizId);
     }
 
     public IEnumerable<QuizDto> RetrieveQuizzes()
@@ -90,28 +64,37 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
             throw new AnswerNotFoundException(questionId);
         }
 
-        var attempt = new QuizAnswerAttempt
+        // Check if the question has already been answered
+        if (!answeredQuestionIds.Contains(questionId))
         {
-            QuizId = quizId,
-            QuestionId = questionId,
-            AttemptedAnswer = inputDto.Text,
-            IsCorrect = answer.IsCorrect,
-            UserEmail = userEmail,
-            AttemptedAt = DateTime.UtcNow
-        };
+            // Create and track the user's answer attempt
+            var attempt = new QuizAnswerAttempt
+            {
+                QuizId = quizId,
+                QuestionId = questionId,
+                AttemptedAnswer = inputDto.Text,
+                IsCorrect = answer.IsCorrect,
+                UserEmail = userEmail,
+                AttemptedAt = DateTime.UtcNow
+            };
 
-        context.QuizAnswerAttempts.Add(attempt);
-        await context.SaveChangesAsync();
+            // Add the attempt to the context and save changes
+            context.QuizAnswerAttempts.Add(attempt);
+            await context.SaveChangesAsync();
 
-        var correctAnswerDto = new AnswerDto(answer.Text, answer.IsCorrect);
+            // Mark the question as answered
+            answeredQuestionIds.Add(questionId);
+        }
 
+        // Prepare the correct answer DTO to return
         return new AnswerValidationDto
         {
             Selected = inputDto.Text,
             IsCorrect = answer.IsCorrect,
-            CorrectAnswer = correctAnswerDto
+            CorrectAnswer = new AnswerDto(answer.Text, answer.IsCorrect)
         };
     }
+
 
     public async Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt)
     {
@@ -127,4 +110,33 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
     {
         return repository.RetrieveAttemptsForQuestion(quizId, questionId);
     }
+
+    public async Task<int> GetNextUnansweredQuestionIndexAsync(Guid quizId, string userEmail)
+    {
+        // Fetch all question IDs for the given quiz
+        var questionIds = await context.Questions
+            .Where(q => q.QuizId == quizId)
+            .Select(q => q.Id)
+            .ToListAsync();
+
+        // Fetch all answered question IDs for the user in the given quiz
+        var answeredQuestionIds = await context.QuizAnswerAttempts
+            .Where(attempt => attempt.QuizId == quizId && attempt.UserEmail == userEmail)
+            .Select(attempt => attempt.QuestionId)
+            .ToListAsync();
+
+        // Debugging output to check IDs
+        Console.WriteLine($"Question IDs: {string.Join(", ", questionIds)}");
+        Console.WriteLine($"Answered Question IDs: {string.Join(", ", answeredQuestionIds)}");
+
+        // Find the index of the next unanswered question
+        var unansweredQuestionIndex = questionIds
+            .FindIndex(qId => !answeredQuestionIds.Contains(qId));
+
+        // Return the index or -1 if all questions have been answered
+        return unansweredQuestionIndex;
+    }
+
+
+
 }
