@@ -40,6 +40,8 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string token)
     {
+        // TODO: throw error, when questions are not found for a given quiz.
+
         return repository.RetrieveQuestions(quizId, DecodeJwtToken(token));
     }
 
