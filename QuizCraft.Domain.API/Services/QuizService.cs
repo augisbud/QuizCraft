@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Text.Json;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -34,7 +33,6 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public QuizDto RetrieveQuizById(Guid id)
     {
-
         return repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
     }
 
