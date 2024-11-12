@@ -21,7 +21,6 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         return Ok(result);
     }
 
-
     [HttpGet("/quizzes")]
     public ActionResult<IEnumerable<QuizDto>> GetQuizzes()
     {
@@ -32,28 +31,28 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpGet("/quizzes/{id}")]
-    public async Task<ActionResult<QuizDto>> GetQuizById(Guid id)
+    public ActionResult<QuizDto> GetQuizById(Guid id)
     {
         var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
         var userEmail = DecodeJwtToken(token);
 
         var quiz = quizService.RetrieveQuizById(id);
 
-        var nextUnansweredQuestionIndex = await quizService.GetNextUnansweredQuestionIndexAsync(id, userEmail);
-        quiz.NextUnansweredQuestionIndex = nextUnansweredQuestionIndex;
-
         return Ok(quiz);
     }
 
-
     [Authorize]
     [HttpGet("/quizzes/{id}/questions")]
-    public ActionResult<IEnumerable<QuestionDto>> GetQuestions(Guid id)
+    public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions(Guid id)
     {
-        var result = quizService.RetrieveQuestions(id);
+        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
+        var userEmail = DecodeJwtToken(token);
+
+        var result = quizService.RetrieveQuestions(id, userEmail);
 
         return Ok(result);
     }
+
 
     [Authorize]
     [HttpPost("/quizzes/{quizId}/questions/{questionId}")]
@@ -63,6 +62,7 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         var userEmail = DecodeJwtToken(token);
 
         var result = await quizService.ValidateAnswerAndTrackAttemptAsync(quizId, questionId, inputDto, userEmail);
+
         return Ok(result);
     }
 

@@ -13,10 +13,8 @@ using QuizCraft.Domain.API.Data;
 
 namespace QuizCraft.Domain.API.Services;
 
-public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuizRepository repository, QuizzesDbContext context) : IQuizService
+public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuizRepository repository) : IQuizService
 {
-    private HashSet<Guid> answeredQuestionIds = new HashSet<Guid>();
-
     public async Task<QuizDto> CreateQuizAsync(string source)
     {
         // 4. Named and optional argument usage
@@ -42,9 +40,9 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         return unboxedQuiz;
     }
 
-    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId)
+    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string userEmail)
     {
-        return repository.RetrieveQuestions(quizId);
+        return repository.RetrieveQuestions(quizId, userEmail);
     }
 
     public IEnumerable<QuizDto> RetrieveQuizzes()
@@ -56,40 +54,25 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public async Task<AnswerValidationDto> ValidateAnswerAndTrackAttemptAsync(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto, string userEmail)
     {
-        var answer = await context.Answers
-            .FirstOrDefaultAsync(a => a.QuestionId == questionId && a.Question.QuizId == quizId && a.Text == inputDto.Text);
+        var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
 
-        if (answer == null)
+        await repository.CreateQuizAnswerAttemptAsync(new QuizAnswerAttempt
         {
-            throw new AnswerNotFoundException(questionId);
-        }
-
-        if (!answeredQuestionIds.Contains(questionId))
-        {
-            var attempt = new QuizAnswerAttempt
-            {
-                QuizId = quizId,
-                QuestionId = questionId,
-                AttemptedAnswer = inputDto.Text,
-                IsCorrect = answer.IsCorrect,
-                UserEmail = userEmail,
-                AttemptedAt = DateTime.UtcNow
-            };
-
-            context.QuizAnswerAttempts.Add(attempt);
-            await context.SaveChangesAsync();
-
-            answeredQuestionIds.Add(questionId);
-        }
+            QuizId = quizId,
+            QuestionId = questionId,
+            AttemptedAnswer = inputDto.Text,
+            IsCorrect = answer.Text == inputDto.Text,
+            UserEmail = userEmail,
+            AttemptedAt = DateTime.UtcNow
+        });
 
         return new AnswerValidationDto
         {
             Selected = inputDto.Text,
-            IsCorrect = answer.IsCorrect,
-            CorrectAnswer = new AnswerDto(answer.Text, answer.IsCorrect)
+            IsCorrect = answer.Text == inputDto.Text,
+            CorrectAnswer = answer
         };
     }
-
 
     public async Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt)
     {
@@ -105,29 +88,4 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
     {
         return repository.RetrieveAttemptsForQuestion(quizId, questionId);
     }
-
-    public async Task<int> GetNextUnansweredQuestionIndexAsync(Guid quizId, string userEmail)
-    {
-        var questionIds = await context.Questions
-            .Where(q => q.QuizId == quizId)
-            .Select(q => q.Id)
-            .ToListAsync();
-
-        var answeredQuestionIds = await context.QuizAnswerAttempts
-            .Where(attempt => attempt.QuizId == quizId && attempt.UserEmail == userEmail)
-            .Select(attempt => attempt.QuestionId)
-            .ToListAsync();
-
-        // Debugging output to check IDs
-        Console.WriteLine($"Question IDs: {string.Join(", ", questionIds)}");
-        Console.WriteLine($"Answered Question IDs: {string.Join(", ", answeredQuestionIds)}");
-
-        var unansweredQuestionIndex = questionIds
-            .FindIndex(qId => !answeredQuestionIds.Contains(qId));
-
-        return unansweredQuestionIndex;
-    }
-
-
-
 }

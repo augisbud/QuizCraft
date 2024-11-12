@@ -35,12 +35,12 @@ export const Quiz = () => {
     const fetchQuiz = async () => {
       if (quizId === undefined) return;
 
-        const quizData = await client.quizzesGET(quizId);
-        if (quizData.nextUnansweredQuestionIndex !== undefined) {
-            setCurrentQuestionIndex(quizData.nextUnansweredQuestionIndex);
-        }
+      const quizData = await client.quizzesGET(quizId);
+        setQuiz(quizData);
 
-      setQuiz(quizData);
+      if (quizData?.nextUnansweredQuestionIndex !== undefined) {
+        setCurrentQuestionIndex(quizData.nextUnansweredQuestionIndex);
+      }
     };
 
     if(sessionStorage.getItem("token"))
@@ -156,6 +156,7 @@ export const Quiz = () => {
           )}
         </div>
         <p style={{ color: "black" }}>
+          {/* TODO: change to see the progress of the whole quiz, not the current session */}
           Answered Questions: {Object.keys(answers).length}/{questions.length}
         </p>
       </div>

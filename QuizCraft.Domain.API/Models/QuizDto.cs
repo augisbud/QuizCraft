@@ -19,6 +19,4 @@ public class QuizDto
 
     [Required]
     public int QuestionCount { get; set; }
-
-    public int NextUnansweredQuestionIndex { get; set; } = 0;
 }

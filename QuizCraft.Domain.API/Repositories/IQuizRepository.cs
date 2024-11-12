@@ -7,7 +7,7 @@ public interface IQuizRepository
 {
     Task<Quiz> CreateQuizAsync(Quiz quiz);
     QuizDto? RetrieveQuizById(Guid id);
-    IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId);
+    IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string userEmail);
     AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId);
     IEnumerable<QuizDto> RetrieveQuizzes();
     Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt);

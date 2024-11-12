@@ -36,13 +36,21 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         return data;
     }
 
-    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId)
+    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string userEmail)
     {
-        var data = context.Questions
-            .Where(question => question.QuizId == quizId)
-            .ProjectTo<QuestionDto>(mapper.ConfigurationProvider);
+        // Retrieve the IDs of questions already answered by the user for the specific quiz
+        var answeredQuestionIds = context.QuizAnswerAttempts
+            .Where(qa => qa.QuizId == quizId && qa.UserEmail == userEmail)
+            .Select(qa => qa.QuestionId)
+            .ToList();
 
-        return data;
+        // Retrieve unanswered questions for the given quiz
+        var unansweredQuestions = context.Questions
+            .Where(q => q.QuizId == quizId && !answeredQuestionIds.Contains(q.Id))
+            .ProjectTo<QuestionDto>(mapper.ConfigurationProvider)
+            .ToList();
+
+        return unansweredQuestions;
     }
 
     public AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId)
