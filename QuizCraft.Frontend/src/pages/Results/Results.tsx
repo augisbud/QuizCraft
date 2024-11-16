@@ -10,7 +10,7 @@ export const Results = () => {
 
   useEffect(() => {
     if(!sessionStorage.getItem("token"))
-      navigate("/signin");  
+      navigate("/signin?redirect=/results");  
   }, [navigate])
 
   const { correctAnswers, totalQuestions } = location.state;

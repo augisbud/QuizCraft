@@ -11,7 +11,7 @@ export const CreateQuiz = () => {
 
   useEffect(() => {
     if(!sessionStorage.getItem("token"))
-      navigate("/signin");  
+      navigate("/signin?redirect=/create-quiz");  
   }, [navigate])
 
   const [file, setFile] = useState<File | null>(null);

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Text.Json;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
@@ -34,12 +33,13 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public QuizDto RetrieveQuizById(Guid id)
     {
-
         return repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
     }
 
     public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string token)
     {
+        // TODO: throw error, when questions are not found for a given quiz.
+
         return repository.RetrieveQuestions(quizId, DecodeJwtToken(token));
     }
 
