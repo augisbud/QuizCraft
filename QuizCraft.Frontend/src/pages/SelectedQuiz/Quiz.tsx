@@ -30,14 +30,26 @@ export const Quiz = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [isAnswerCorrect, setIsAnswerCorrect] = useState<boolean | null>(null);
   const [correctAnswer, setCorrectAnswer] = useState<AnswerDto | null>(null);
+  const [persistedAnswers, setPersistedAnswers] = useState<{ [key: string]: string }>({});
+
 
   useEffect(() => {
-    const fetchQuiz = async () => {
-      if (quizId === undefined) return;
+      const fetchQuiz = async () => {
+        if (quizId === undefined) return;
 
-      const quizData = await client.quizzesGET(quizId);
-      setQuiz(quizData);
-    };
+        const quizData = await client.quizzesGET(quizId);
+        setQuiz(quizData);
+
+        if (quizData?.nextUnansweredQuestionIndex !== undefined) {
+            setCurrentQuestionIndex(quizData.nextUnansweredQuestionIndex);
+        }
+
+        // Retrieve saved answers from localStorage or API
+        const savedAnswers = JSON.parse(localStorage.getItem(`quiz_${quizId}_answers`) || "{}");
+        setPersistedAnswers(savedAnswers);
+        setAnswers(savedAnswers); // Set initial answers based on saved answers
+      };
+
 
     if(sessionStorage.getItem("token"))
       fetchQuiz();
@@ -62,11 +74,16 @@ export const Quiz = () => {
   const currentQuestion = questions[currentQuestionIndex];
 
   const handleAnswerChange = (questionId: string, answer: string) => {
-    setAnswers((prevAnswers) => ({
-      ...prevAnswers,
-      [questionId]: answer,
-    }));
-  };
+    setAnswers((prevAnswers) => {
+      const updatedAnswers = { ...prevAnswers, [questionId]: answer };
+    
+      // Persist the updated answers
+      localStorage.setItem(`quiz_${quizId}_answers`, JSON.stringify(updatedAnswers));
+    
+      return updatedAnswers;
+  });
+};
+
 
   const handleSubmitValidation = async () => {
     const questionId = currentQuestion.id!;
@@ -151,9 +168,9 @@ export const Quiz = () => {
             </Button>
           )}
         </div>
-        <p style={{ color: "black" }}>
-          Answered Questions: {Object.keys(answers).length}/{questions.length}
-        </p>
+          <p style={{ color: "black" }}>
+            Answered Questions: {Object.keys({ ...persistedAnswers, ...answers }).length}/{quiz?.questionCount || questions.length}
+          </p>
       </div>
     </>
   );

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using QuizCraft.Domain.API.Data;
@@ -11,9 +12,11 @@ using QuizCraft.Domain.API.Data;
 namespace QuizCraft.Domain.API.Migrations
 {
     [DbContext(typeof(QuizzesDbContext))]
-    partial class QuizzesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241030011414_QuizAnswerAttempt")]
+    partial class QuizAnswerAttempt
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

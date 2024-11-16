@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Text.Json;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using QuizCraft.Domain.API.APIClients;
 using QuizCraft.Domain.API.Constants;
 using QuizCraft.Domain.API.Entities;
@@ -8,6 +9,8 @@ using QuizCraft.Domain.API.Exceptions;
 using QuizCraft.Domain.API.Extensions;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Repositories;
+using QuizCraft.Domain.API.Data;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace QuizCraft.Domain.API.Services;
 
@@ -31,44 +34,13 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public QuizDto RetrieveQuizById(Guid id)
     {
-        // 8. Boxing and unboxing
-        object boxedQuiz = repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
-        var unboxedQuiz = (QuizDto) boxedQuiz;
 
-        return unboxedQuiz;
+        return repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
     }
 
-    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId)
+    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string token)
     {
-        // TODO: throw error, when questions are not found for a given quiz.
-        var questions = repository.RetrieveQuestions(quizId);
-        
-        // 8. Boxing and unboxing
-        var boxedQuestions = (object) questions;
-        var unboxedQuestions = (IEnumerable<Question>) boxedQuestions;
-
-        // 6. Iterating through collection the right way
-        var data = unboxedQuestions.Select(q => new QuestionDto
-        {
-            Id = q.Id,
-            Text = q.Text,
-            Answers = q.Answers.Select(a => a.Text).ToList()
-        });
-
-        return data;
-    }
-
-    public AnswerValidationDto ValidateAnswer(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto)
-    {
-        // TODO: store user progress.
-        var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
-
-        return new()
-        {
-            Selected = inputDto.Text,
-            IsCorrect = answer.Text == inputDto.Text,
-            CorrectAnswer = answer
-        };
+        return repository.RetrieveQuestions(quizId, DecodeJwtToken(token));
     }
 
     public IEnumerable<QuizDto> RetrieveQuizzes()
@@ -76,5 +48,35 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         var quizzes = repository.RetrieveQuizzes();
 
         return quizzes;
+    }
+
+    public async Task<AnswerValidationDto> ValidateAnswerAndTrackAttemptAsync(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto, string token)
+    {
+        var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
+
+        await repository.CreateQuizAnswerAttemptAsync(new QuizAnswerAttempt
+        {
+            QuizId = quizId,
+            QuestionId = questionId,
+            AttemptedAnswer = inputDto.Text,
+            IsCorrect = answer.Text == inputDto.Text,
+            UserEmail = DecodeJwtToken(token),
+            AttemptedAt = DateTime.UtcNow
+        });
+
+        return new AnswerValidationDto
+        {
+            Selected = inputDto.Text,
+            IsCorrect = answer.Text == inputDto.Text,
+            CorrectAnswer = answer
+        };
+    }
+
+    private static string DecodeJwtToken(string token)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
+
+        return jwtToken.Claims.First(c => c.Type == "email").Value;
     }
 }

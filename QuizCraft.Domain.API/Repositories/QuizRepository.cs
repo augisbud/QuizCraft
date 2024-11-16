@@ -36,12 +36,19 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         return data;
     }
 
-    public IEnumerable<Question> RetrieveQuestions(Guid quizId)
+    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string userEmail)
     {
-        var data = context.Questions
-            .Where(question => question.QuizId == quizId);
+        // Retrieve the IDs of questions already answered by the user for the specific quiz
+        var answeredQuestionIds = context.QuizAnswerAttempts
+            .Where(qa => qa.QuizId == quizId && qa.UserEmail == userEmail)
+            .Select(qa => qa.QuestionId);
 
-        return data;
+        // Retrieve unanswered questions for the given quiz
+        var unansweredQuestions = context.Questions
+            .Where(q => q.QuizId == quizId && !answeredQuestionIds.Contains(q.Id))
+            .ProjectTo<QuestionDto>(mapper.ConfigurationProvider);
+
+        return unansweredQuestions;
     }
 
     public AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId)
@@ -52,5 +59,12 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
             .FirstOrDefault();
 
         return data;
+    }
+
+    public async Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt)
+    {
+        var result = await context.QuizAnswerAttempts.AddAsync(attempt);
+        await context.SaveChangesAsync();
+        return result.Entity;
     }
 }

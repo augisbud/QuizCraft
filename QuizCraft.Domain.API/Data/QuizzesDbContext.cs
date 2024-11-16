@@ -8,4 +8,5 @@ public class QuizzesDbContext(DbContextOptions<QuizzesDbContext> options) : DbCo
     public required virtual DbSet<Quiz> Quizzes { get; set; }
     public required virtual DbSet<Question> Questions { get; set; }
     public required virtual DbSet<Answer> Answers { get; set; }
+    public required virtual DbSet<QuizAnswerAttempt> QuizAnswerAttempts { get; set; }
 }

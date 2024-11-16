@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Services;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace QuizCraft.Domain.API.Controllers;
 
@@ -13,7 +14,6 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     public async Task<ActionResult<QuizDto>> CreateQuizAsync([FromForm] IFormFile file)
     {
         var source = await fileProcessingService.ProcessFileAsync(file);
-
         var result = await quizService.CreateQuizAsync(source);
 
         return Ok(result);
@@ -31,25 +31,30 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     [HttpGet("/quizzes/{id}")]
     public ActionResult<QuizDto> GetQuizById(Guid id)
     {
-        var result = quizService.RetrieveQuizById(id);
+        var quiz = quizService.RetrieveQuizById(id);
 
-        return Ok(result);
+        return Ok(quiz);
     }
 
     [Authorize]
     [HttpGet("/quizzes/{id}/questions")]
     public ActionResult<IEnumerable<QuestionDto>> GetQuestions(Guid id)
     {
-        var result = quizService.RetrieveQuestions(id);
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
+
+        var result = quizService.RetrieveQuestions(id, token);
 
         return Ok(result);
     }
 
+
     [Authorize]
     [HttpPost("/quizzes/{quizId}/questions/{questionId}")]
-    public ActionResult<AnswerValidationDto> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
+    public async Task<ActionResult<AnswerValidationDto>> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
     {
-        var result = quizService.ValidateAnswer(quizId, questionId, inputDto);
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
+
+        var result = await quizService.ValidateAnswerAndTrackAttemptAsync(quizId, questionId, inputDto, token);
 
         return Ok(result);
     }

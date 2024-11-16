@@ -25,33 +25,41 @@ export const CreateQuiz = () => {
     }
   };
 
-  const handleSubmit = async (fileToUpload: File) => {
-    if (!fileToUpload) {
-      alert("Please select a file first.");
-      return;
-    }
+    const handleSubmit = async (fileToUpload: File) => {
+        if (!fileToUpload) {
+            alert("Please select a file first.");
+            return;
+        }
 
-    const formData = new FormData();
-    formData.append("file", fileToUpload);
+        const formData = new FormData();
+        formData.append("file", fileToUpload);
 
-    try {
-      const response = await fetch("https://localhost:8080/quizzes", {
-        method: "POST",
-        body: formData,
-      });
+        try {
+            const token = sessionStorage.getItem("token");
 
-      if (response.ok) {
-        const quiz = (await response.json()) as QuizDto;
+            const response = await fetch("https://localhost:8080/quizzes", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                },
+            });
 
-        navigate(`/quizzes/${quiz.id}`);
-      } else {
-        alert("File upload failed.");
-      }
-    } catch (error) {
-      console.error("Error during file upload:", error);
-      alert("An error occurred.");
-    }
-  };
+            if (response.ok) {
+                const quiz = (await response.json()) as QuizDto;
+                navigate(`/quizzes/${quiz.id}`);
+            } else if (response.status === 401) {
+                alert("You are not authorized. Please sign in.");
+                navigate("/signin");
+            } else {
+                alert("File upload failed.");
+            }
+        } catch (error) {
+            console.error("Error during file upload:", error);
+            alert("An error occurred.");
+        }
+    };
+
 
   const VisuallyHiddenInput = styled("input")({
     clip: "rect(0 0 0 0)",
