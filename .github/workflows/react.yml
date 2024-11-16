@@ -3,7 +3,7 @@ name: Frontend to DigitalOcean Spaces
 on:
   push:
     branches:
-      - main
+      - master
 
 jobs:
   build-and-deploy:
