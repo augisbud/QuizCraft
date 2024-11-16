@@ -45,5 +45,4 @@ jobs:
           SPACE_NAME: ${{ secrets.DIGITALOCEAN_SPACE_NAME }}
           SPACE_REGION: ${{ secrets.DIGITALOCEAN_SPACE_REGION }}
         run: |
-          apt-get update && apt-get install -y awscli
-          aws --endpoint-url=https://${{ secrets.DIGITALOCEAN_SPACE_REGION }}.digitaloceanspaces.com s3 sync ./QuizCraft.Frontend/build/ s3://${{ secrets.DIGITALOCEAN_SPACE_NAME }}/
+          doctl compute ssh <your-droplet-name> --ssh-command "aws s3 sync ./QuizCraft.Frontend/build/ s3://${{ secrets.DIGITALOCEAN_SPACE_NAME }}/ --endpoint-url=https://${{ secrets.DIGITALOCEAN_SPACE_REGION }}.digitaloceanspaces.com"
