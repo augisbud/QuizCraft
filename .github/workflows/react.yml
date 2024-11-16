@@ -34,19 +34,18 @@ jobs:
           sudo apt-get install -y s3cmd
           s3cmd --version
 
-      - name: Configure s3cmd
+      - name: Create s3cmd config file
         env:
           DIGITALOCEAN_SPACES_KEY: ${{ secrets.DIGITALOCEAN_SPACES_KEY }}
           DIGITALOCEAN_SPACES_SECRET: ${{ secrets.DIGITALOCEAN_SPACES_SECRET }}
           DIGITALOCEAN_SPACE_REGION: ${{ secrets.DIGITALOCEAN_SPACE_REGION }}
         run: |
-          s3cmd --configure <<EOF
-          $DIGITALOCEAN_SPACES_KEY
-          $DIGITALOCEAN_SPACES_SECRET
-          $DIGITALOCEAN_SPACE_REGION.digitaloceanspaces.com
-          %(bucket)s.$DIGITALOCEAN_SPACE_REGION.digitaloceanspaces.com
-          Y
-          EOF
+          echo "[default]" > ~/.s3cfg
+          echo "access_key = $DIGITALOCEAN_SPACES_KEY" >> ~/.s3cfg
+          echo "secret_key = $DIGITALOCEAN_SPACES_SECRET" >> ~/.s3cfg
+          echo "host_base = $DIGITALOCEAN_SPACE_REGION.digitaloceanspaces.com" >> ~/.s3cfg
+          echo "host_bucket = %(bucket)s.$DIGITALOCEAN_SPACE_REGION.digitaloceanspaces.com" >> ~/.s3cfg
+          echo "use_https = True" >> ~/.s3cfg
 
       - name: Upload files to DigitalOcean Space
         env:
