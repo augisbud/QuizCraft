@@ -1,4 +1,4 @@
-name: Frontend to DigitalOcean Spaces
+name: UI CI/CD
 
 on:
   push:
@@ -28,21 +28,28 @@ jobs:
           cd ./QuizCraft.Frontend
           npm run build
 
-      - name: Install doctl
+      - name: Install s3cmd
         run: |
-          curl -sL https://github.com/digitalocean/doctl/releases/download/v1.64.0/doctl-1.64.0-linux-amd64.tar.gz -o doctl.tar.gz
-          tar -xzvf doctl.tar.gz
-          sudo mv doctl /usr/local/bin/
-          doctl version
+          sudo apt-get update
+          sudo apt-get install -y s3cmd
+          s3cmd --version
 
-      - name: Authenticate doctl
+      - name: Configure s3cmd
         env:
-          DIGITALOCEAN_ACCESS_TOKEN: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
-        run: doctl auth init
+          DIGITALOCEAN_SPACES_KEY: ${{ secrets.DIGITALOCEAN_SPACES_KEY }}
+          DIGITALOCEAN_SPACES_SECRET: ${{ secrets.DIGITALOCEAN_SPACES_SECRET }}
+          DIGITALOCEAN_SPACE_REGION: ${{ secrets.DIGITALOCEAN_SPACE_REGION }}
+        run: |
+          s3cmd --configure <<EOF
+          $DIGITALOCEAN_SPACES_KEY
+          $DIGITALOCEAN_SPACES_SECRET
+          $DIGITALOCEAN_SPACE_REGION.digitaloceanspaces.com
+          %(bucket)s.$DIGITALOCEAN_SPACE_REGION.digitaloceanspaces.com
+          Y
+          EOF
 
-      - name: Upload files to Space
+      - name: Upload files to DigitalOcean Space
         env:
           SPACE_NAME: ${{ secrets.DIGITALOCEAN_SPACE_NAME }}
-          SPACE_REGION: ${{ secrets.DIGITALOCEAN_SPACE_REGION }}
         run: |
-          doctl compute ssh <your-droplet-name> --ssh-command "aws s3 sync ./QuizCraft.Frontend/build/ s3://${{ secrets.DIGITALOCEAN_SPACE_NAME }}/ --endpoint-url=https://${{ secrets.DIGITALOCEAN_SPACE_REGION }}.digitaloceanspaces.com"
+          s3cmd sync ./QuizCraft.Frontend/build/ s3://${{ env.SPACE_NAME }}/ --acl-public
