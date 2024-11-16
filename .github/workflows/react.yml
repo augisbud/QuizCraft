@@ -51,4 +51,4 @@ jobs:
         env:
           SPACE_NAME: ${{ secrets.DIGITALOCEAN_SPACE_NAME }}
         run: |
-          s3cmd sync ./QuizCraft.Frontend/build/ s3://${{ env.SPACE_NAME }}/ --acl-public
+          s3cmd sync ./QuizCraft.Frontend/dist/ s3://${{ env.SPACE_NAME }}/ --acl-public
