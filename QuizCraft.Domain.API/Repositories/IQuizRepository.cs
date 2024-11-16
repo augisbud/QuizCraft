@@ -11,6 +11,4 @@ public interface IQuizRepository
     AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId);
     IEnumerable<QuizDto> RetrieveQuizzes();
     Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt);
-    IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempts(Guid quizId);
-    IEnumerable<QuizAnswerAttempt> RetrieveAttemptsForQuestion(Guid quizId, Guid questionId);
 }

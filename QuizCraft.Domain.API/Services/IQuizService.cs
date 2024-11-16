@@ -7,10 +7,7 @@ public interface IQuizService
 {
     Task<QuizDto> CreateQuizAsync(string source);
     QuizDto RetrieveQuizById(Guid id);
-    IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string userEmail);
+    IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string token);
     IEnumerable<QuizDto> RetrieveQuizzes();
-    Task<AnswerValidationDto> ValidateAnswerAndTrackAttemptAsync(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto, string userEmail);
-    Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt);
-    IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempts(Guid quizId);
-    IEnumerable<QuizAnswerAttempt> RetrieveAttemptsForQuestion(Guid quizId, Guid questionId);
+    Task<AnswerValidationDto> ValidateAnswerAndTrackAttemptAsync(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto, string token);
 }

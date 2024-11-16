@@ -41,14 +41,12 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         // Retrieve the IDs of questions already answered by the user for the specific quiz
         var answeredQuestionIds = context.QuizAnswerAttempts
             .Where(qa => qa.QuizId == quizId && qa.UserEmail == userEmail)
-            .Select(qa => qa.QuestionId)
-            .ToList();
+            .Select(qa => qa.QuestionId);
 
         // Retrieve unanswered questions for the given quiz
         var unansweredQuestions = context.Questions
             .Where(q => q.QuizId == quizId && !answeredQuestionIds.Contains(q.Id))
-            .ProjectTo<QuestionDto>(mapper.ConfigurationProvider)
-            .ToList();
+            .ProjectTo<QuestionDto>(mapper.ConfigurationProvider);
 
         return unansweredQuestions;
     }
@@ -68,22 +66,5 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         var result = await context.QuizAnswerAttempts.AddAsync(attempt);
         await context.SaveChangesAsync();
         return result.Entity;
-    }
-
-    public IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempts(Guid quizId)
-    {
-        var attempts = context.QuizAnswerAttempts
-            .Where(attempt => attempt.QuizId == quizId)
-            .Include(attempt => attempt.Question)
-            .ToList();
-        return attempts;
-    }
-
-    public IEnumerable<QuizAnswerAttempt> RetrieveAttemptsForQuestion(Guid quizId, Guid questionId)
-    {
-        var attempts = context.QuizAnswerAttempts
-            .Where(attempt => attempt.QuizId == quizId && attempt.QuestionId == questionId)
-            .ToList();
-        return attempts;
     }
 }

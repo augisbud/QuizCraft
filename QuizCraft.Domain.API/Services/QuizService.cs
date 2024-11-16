@@ -10,6 +10,7 @@ using QuizCraft.Domain.API.Extensions;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Repositories;
 using QuizCraft.Domain.API.Data;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace QuizCraft.Domain.API.Services;
 
@@ -33,16 +34,13 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public QuizDto RetrieveQuizById(Guid id)
     {
-        // 8. Boxing and unboxing
-        object boxedQuiz = repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
-        var unboxedQuiz = (QuizDto) boxedQuiz;
 
-        return unboxedQuiz;
+        return repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
     }
 
-    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string userEmail)
+    public IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string token)
     {
-        return repository.RetrieveQuestions(quizId, userEmail);
+        return repository.RetrieveQuestions(quizId, DecodeJwtToken(token));
     }
 
     public IEnumerable<QuizDto> RetrieveQuizzes()
@@ -52,7 +50,7 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         return quizzes;
     }
 
-    public async Task<AnswerValidationDto> ValidateAnswerAndTrackAttemptAsync(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto, string userEmail)
+    public async Task<AnswerValidationDto> ValidateAnswerAndTrackAttemptAsync(Guid quizId, Guid questionId, AnswerValidationInputDto inputDto, string token)
     {
         var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
 
@@ -62,7 +60,7 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
             QuestionId = questionId,
             AttemptedAnswer = inputDto.Text,
             IsCorrect = answer.Text == inputDto.Text,
-            UserEmail = userEmail,
+            UserEmail = DecodeJwtToken(token),
             AttemptedAt = DateTime.UtcNow
         });
 
@@ -74,18 +72,11 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         };
     }
 
-    public async Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt)
+    private static string DecodeJwtToken(string token)
     {
-        return await repository.CreateQuizAnswerAttemptAsync(attempt);
-    }
+        var handler = new JwtSecurityTokenHandler();
+        var jwtToken = handler.ReadJwtToken(token);
 
-    public IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempts(Guid quizId)
-    {
-        return repository.RetrieveQuizAnswerAttempts(quizId);
-    }
-
-    public IEnumerable<QuizAnswerAttempt> RetrieveAttemptsForQuestion(Guid quizId, Guid questionId)
-    {
-        return repository.RetrieveAttemptsForQuestion(quizId, questionId);
+        return jwtToken.Claims.First(c => c.Type == "email").Value;
     }
 }

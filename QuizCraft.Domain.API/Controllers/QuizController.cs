@@ -13,8 +13,6 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     [HttpPost("/quizzes")]
     public async Task<ActionResult<QuizDto>> CreateQuizAsync([FromForm] IFormFile file)
     {
-        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-
         var source = await fileProcessingService.ProcessFileAsync(file);
         var result = await quizService.CreateQuizAsync(source);
 
@@ -33,9 +31,6 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     [HttpGet("/quizzes/{id}")]
     public ActionResult<QuizDto> GetQuizById(Guid id)
     {
-        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        var userEmail = DecodeJwtToken(token);
-
         var quiz = quizService.RetrieveQuizById(id);
 
         return Ok(quiz);
@@ -43,12 +38,11 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpGet("/quizzes/{id}/questions")]
-    public async Task<ActionResult<IEnumerable<QuestionDto>>> GetQuestions(Guid id)
+    public ActionResult<IEnumerable<QuestionDto>> GetQuestions(Guid id)
     {
-        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        var userEmail = DecodeJwtToken(token);
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        var result = quizService.RetrieveQuestions(id, userEmail);
+        var result = quizService.RetrieveQuestions(id, token);
 
         return Ok(result);
     }
@@ -58,18 +52,10 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     [HttpPost("/quizzes/{quizId}/questions/{questionId}")]
     public async Task<ActionResult<AnswerValidationDto>> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
     {
-        var token = HttpContext.Request.Headers["Authorization"].ToString().Replace("Bearer ", "");
-        var userEmail = DecodeJwtToken(token);
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        var result = await quizService.ValidateAnswerAndTrackAttemptAsync(quizId, questionId, inputDto, userEmail);
+        var result = await quizService.ValidateAnswerAndTrackAttemptAsync(quizId, questionId, inputDto, token);
 
         return Ok(result);
-    }
-
-    private string DecodeJwtToken(string token)
-    {
-        var handler = new JwtSecurityTokenHandler();
-        var jwtToken = handler.ReadJwtToken(token);
-        return jwtToken.Claims.First(claim => claim.Type == "email").Value;
     }
 }
