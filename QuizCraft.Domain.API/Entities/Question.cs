@@ -5,14 +5,15 @@ namespace QuizCraft.Domain.API.Entities;
 public class Question
 {
     [Key, Required]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    public string Text { get; set; } = "";
+    public required string Text { get; set; }
 
     [Required]
-    public Guid QuizId { get; set; }
+    public required Guid QuizId { get; set; }
+
 
     public Quiz Quiz { get; set; } = null!;
-    public IEnumerable<Answer> Answers { get; set; } = [];
+    public ICollection<Answer> Answers { get; set; } = [];
 }

@@ -8,6 +8,11 @@ export default defineConfig({
         port: 3000
     },
     css: {
+        preprocessorOptions: {
+            scss: {
+                api: 'modern'
+            }
+        },
         modules: {
             localsConvention: "camelCase"
         }

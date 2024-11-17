@@ -7,7 +7,6 @@ public class SwaggerFileUploadOperationFilter : IOperationFilter
 {
     public void Apply(OpenApiOperation operation, OperationFilterContext context)
     {
-        // Check if the action has a file upload
         var hasFileUpload = context.ApiDescription.ParameterDescriptions
             .Any(p => p.Type == typeof(IFormFile));
 
@@ -17,7 +16,7 @@ public class SwaggerFileUploadOperationFilter : IOperationFilter
             {
                 Name = "file",
                 In = ParameterLocation.Query,
-                Required = true, // Set to true if the file is required
+                Required = true,
                 Schema = new OpenApiSchema { Type = "string", Format = "binary" }
             });
         }

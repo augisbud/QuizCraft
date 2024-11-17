@@ -7,8 +7,14 @@ public interface IQuizRepository
 {
     Task<Quiz> CreateQuizAsync(Quiz quiz);
     QuizDto? RetrieveQuizById(Guid id);
-    IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId, string userEmail);
+    Quiz? RetrieveQuizWithQuestionsById(Guid id);
+    IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId);
     AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId);
     IEnumerable<QuizDto> RetrieveQuizzes();
-    Task<QuizAnswerAttempt> CreateQuizAnswerAttemptAsync(QuizAnswerAttempt attempt);
+    QuizAttempt? RetrieveQuizAttempt(Guid quizId, string email);
+    IEnumerable<QuizAttempt> RetrieveQuizAttempts(Guid quizId, string email);
+    QuizAttempt CreateQuizAttempt(Guid quizId, string email);
+    IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempt(Guid attemptId);
+    QuizAnswerAttempt CreateQuizAnswerAttempt(Guid attemptId, Guid questionId, Guid answerId);
+    bool SaveChanges();
 }

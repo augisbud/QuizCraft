@@ -37,7 +37,7 @@ export const Results = () => {
           </p>
 
           <div className={styles.resultsButtons}>
-            <Button variant="contained" onClick={() => navigate("/Quizzes")}>
+            <Button variant="contained" onClick={() => navigate("/quizzes")}>
               Go to Quizzes
             </Button>
             <Button

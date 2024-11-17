@@ -2,14 +2,14 @@ using System.ComponentModel.DataAnnotations;
 
 namespace QuizCraft.Domain.API.Models;
 
-public class QuestionDto
+public class QuizAttemptDto
 {
     [Required]
     public required Guid Id { get; set; }
 
     [Required]
-    public required string Text { get; set; }
+    public required DateTime StartedAt { get; set; }
 
     [Required]
-    public required List<AnswerDto> Answers { get; set; }
+    public int CorrectAnswers { get; set; }
 }

@@ -15,20 +15,16 @@ public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient
 
     public async Task<Output> PostAsync(string prompt)
     {
-        var input = new Input()
-        {
-            Contents =
+        var input = new Input(
             [
-                new()
-                {
-                    Parts =
+                new Content(
                     [
-                        new() { Text = prompt }
+                        new Part(prompt)
                     ],
-                    Role = "user" // default role
-                }
+                    "user"
+                )
             ]
-        };
+        );
 
         try
         {
@@ -61,53 +57,9 @@ public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient
     }
 }
 
-public class Input
-{
-    public required List<Content> Contents { get; set; }
-}
-
-public class Output
-{
-    public required List<Candidate> Candidates { get; set; }
-    public required UsageMetadata UsageMetadata { get; set; }
-}
-
-public class Candidate
-{
-    public required Content Content { get; set; }
-    public required string FinishReason { get; set; }
-    public int? Index { get; set; }
-}
-
-public class UsageMetadata
-{
-    public required int PromptTokenCount { get; set; }
-    public required int CandidatesTokenCount { get; set; }
-    public required int TotalTokenCount { get; set; }
-}
-
-public class Content
-{
-    public required List<Part> Parts { get; set; }
-    public required string? Role { get; set; }
-}
-
-// 2. Creating and using your own struct
-public struct Part
-{
-    private string _text;
-
-    // 3. Property usage in struct
-    public required string Text
-    {
-        readonly get { return _text; }
-        set
-        {
-            if (string.IsNullOrEmpty(value))
-            {
-                throw new ArgumentException("Text cannot be null or empty");
-            }
-            _text = value;
-        }
-    }
-}
+public record Input(List<Content> Contents);
+public record Output(List<Candidate> Candidates, UsageMetadata UsageMetadata);
+public record Candidate(Content Content, string FinishReason, int? Index);
+public record UsageMetadata(int PromptTokenCount, int CandidatesTokenCount, int TotalTokenCount);
+public record Content(List<Part> Parts, string? Role);
+public record Part(string Text);

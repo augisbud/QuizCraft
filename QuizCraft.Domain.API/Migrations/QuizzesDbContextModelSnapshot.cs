@@ -89,21 +89,43 @@ namespace QuizCraft.Domain.API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<string>("AttemptedAnswer")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<Guid>("AnswerId")
+                        .HasColumnType("uuid");
 
-                    b.Property<DateTime>("AttemptedAt")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("IsCorrect")
-                        .HasColumnType("boolean");
 
                     b.Property<Guid>("QuestionId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid>("QuizAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("QuizAttemptId");
+
+                    b.ToTable("QuizAnswerAttempts");
+                });
+
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
                     b.Property<Guid>("QuizId")
                         .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserEmail")
                         .IsRequired()
@@ -111,11 +133,9 @@ namespace QuizCraft.Domain.API.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("QuestionId");
-
                     b.HasIndex("QuizId");
 
-                    b.ToTable("QuizAnswerAttempts");
+                    b.ToTable("QuizAttempts");
                 });
 
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.Answer", b =>
@@ -142,19 +162,38 @@ namespace QuizCraft.Domain.API.Migrations
 
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAnswerAttempt", b =>
                 {
+                    b.HasOne("QuizCraft.Domain.API.Entities.Answer", "Answer")
+                        .WithMany()
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("QuizCraft.Domain.API.Entities.Question", "Question")
                         .WithMany()
                         .HasForeignKey("QuestionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("QuizCraft.Domain.API.Entities.QuizAttempt", "QuizAttempt")
+                        .WithMany("QuizAnswerAttempts")
+                        .HasForeignKey("QuizAttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Answer");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuizAttempt");
+                });
+
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAttempt", b =>
+                {
                     b.HasOne("QuizCraft.Domain.API.Entities.Quiz", "Quiz")
                         .WithMany()
                         .HasForeignKey("QuizId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Question");
 
                     b.Navigation("Quiz");
                 });
@@ -167,6 +206,11 @@ namespace QuizCraft.Domain.API.Migrations
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.Quiz", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAttempt", b =>
+                {
+                    b.Navigation("QuizAnswerAttempts");
                 });
 #pragma warning restore 612, 618
         }
