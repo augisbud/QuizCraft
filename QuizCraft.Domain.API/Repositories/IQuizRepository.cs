@@ -12,6 +12,7 @@ public interface IQuizRepository
     AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId);
     IEnumerable<QuizDto> RetrieveQuizzes();
     QuizAttempt? RetrieveQuizAttempt(Guid quizId, string email);
+    IEnumerable<QuizAttempt> RetrieveQuizAttempts(Guid quizId, string email);
     QuizAttempt CreateQuizAttempt(Guid quizId, string email);
     IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempt(Guid attemptId);
     QuizAnswerAttempt CreateQuizAnswerAttempt(Guid attemptId, Guid questionId, Guid answerId);

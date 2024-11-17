@@ -75,6 +75,15 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
             .FirstOrDefault();
     }
 
+    public IEnumerable<QuizAttempt> RetrieveQuizAttempts(Guid quizId, string email)
+    {
+        return context.QuizAttempts
+            .Include(attempt => attempt.QuizAnswerAttempts)
+            .ThenInclude(answerAttempt => answerAttempt.Answer)
+            .Where(attempt => attempt.QuizId == quizId && attempt.UserEmail == email)
+            .OrderBy(attempt => attempt.StartedAt);
+    }
+
     public QuizAttempt CreateQuizAttempt(Guid quizId, string email)
     {
         var result = context.QuizAttempts.Add(new QuizAttempt

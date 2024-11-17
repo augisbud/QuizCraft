@@ -5,8 +5,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Box,
-  Button,
+  Box
 } from "@mui/material";
 import { Navbar } from "../../components/Navbar/Navbar";
 import Paper from "@mui/material/Paper";
@@ -15,6 +14,9 @@ import { QuizNavbar } from "../../components/QuizNavbar/QuizNavbar";
 import { client } from "../../utils/Client";
 import { useEffect, useState } from "react";
 import { QuizDto } from "../../utils/QuizCraftAPIClient";
+import { Analytics, PlayCircleOutline } from "@mui/icons-material";
+import { individualAnalyticsDialogVar } from "../../utils/Cache";
+import { IndividualAnalytics } from "../../components/IndividualAnalytics/IndividualAnalytics";
 
 export const Quizzes = () => {
   const [quizzes, setQuizzes] = useState<QuizDto[]>([]);
@@ -33,6 +35,7 @@ export const Quizzes = () => {
     <>
       <Navbar />
       <QuizNavbar />
+      <IndividualAnalytics />
       <Box
         sx={{
           display: "flex",
@@ -47,8 +50,8 @@ export const Quizzes = () => {
                 <TableCell>No.</TableCell>
                 <TableCell>Quiz name</TableCell>
                 <TableCell>Category</TableCell>
-                <TableCell>Question no.</TableCell>
-                <TableCell align="center">Take the quiz</TableCell>
+                <TableCell>Questions</TableCell>
+                <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -65,8 +68,11 @@ export const Quizzes = () => {
                   <TableCell align="right">{row.questionCount}</TableCell>
                   <TableCell align="center">
                     <Link to={`/quizzes/${row.id}`} style={{ textDecoration: "none" }}>
-                      <Button variant="contained">Start</Button>
+                      <PlayCircleOutline fontSize="large" />
                     </Link>
+                    <span onClick={() => individualAnalyticsDialogVar.set(row.id)}>
+                      <Analytics fontSize="large" />
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}

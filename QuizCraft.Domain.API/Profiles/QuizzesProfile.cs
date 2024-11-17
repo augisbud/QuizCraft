@@ -16,5 +16,8 @@ public class QuizzesProfiles : Profile
 
         CreateMap<Entities.Question, Models.QuestionDto>();
         CreateMap<Entities.Answer, Models.AnswerDto>();
+
+        CreateMap<Entities.QuizAttempt, Models.QuizAttemptDto>()
+            .ForMember(dest => dest.CorrectAnswers, opt => opt.MapFrom(src => src.QuizAnswerAttempts.Count(a => a.Answer.IsCorrect)));
     }
 }
