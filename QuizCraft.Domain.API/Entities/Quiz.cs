@@ -6,7 +6,7 @@ namespace QuizCraft.Domain.API.Entities;
 public class Quiz
 {
     [Key, Required]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     public required string Title { get; set; }
@@ -17,6 +17,6 @@ public class Quiz
     [Required]
     public DateTime CreatedAt { get; } = DateTime.UtcNow;
     
-
-    public IEnumerable<Question> Questions { get; set; } = [];
+    public ICollection<Question> Questions { get; set; } = [];
+    public ICollection<QuizAttempt> QuizAttempts { get; set; } = [];
 }

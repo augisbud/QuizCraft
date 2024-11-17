@@ -33,7 +33,6 @@ public class FileProcessingService : IFileProcessingService
     {
         using var document = DocX.Load(ProcessStream(file));
 
-        // 9. LINQ to Objects usage (methods or queries)
         var text = document.Paragraphs
             .Select(paragraph => paragraph.Text)
             .Aggregate(new StringBuilder(), (sb, paragraphText) => sb.AppendLine(paragraphText))
@@ -47,7 +46,6 @@ public class FileProcessingService : IFileProcessingService
         using var pdfReader = new PdfReader(ProcessStream(file));
         using var pdfDocument = new PdfDocument(pdfReader);
 
-        // 9. LINQ to Objects usage (methods or queries)
         var text = Enumerable.Range(1, pdfDocument.GetNumberOfPages())
             .Select(i => PdfTextExtractor.GetTextFromPage(pdfDocument.GetPage(i)))
             .Aggregate(new StringBuilder(), (sb, pageText) => sb.Append(pageText))
@@ -56,7 +54,6 @@ public class FileProcessingService : IFileProcessingService
         return await Task.FromResult(text);
     }
 
-    // 7. Using a stream to load data (can be from file, web service, socket etc.)
     private static MemoryStream ProcessStream(IFormFile file)
     {
         var stream = new MemoryStream();

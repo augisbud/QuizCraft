@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Services;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace QuizCraft.Domain.API.Controllers;
 
@@ -38,7 +37,7 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpGet("/quizzes/{id}/questions")]
-    public ActionResult<IEnumerable<QuestionDto>> GetQuestions(Guid id)
+    public ActionResult<DetailedQuizDto> GetDetailedQuizDto(Guid id)
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
@@ -50,12 +49,23 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpPost("/quizzes/{quizId}/questions/{questionId}")]
-    public async Task<ActionResult<AnswerValidationDto>> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerValidationInputDto inputDto)
+    public ActionResult<ValidatedAnswerDto> ValidateAnswer(Guid quizId, Guid questionId, [FromBody] AnswerAttemptDto inputDto)
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        var result = await quizService.ValidateAnswerAndTrackAttemptAsync(quizId, questionId, inputDto, token);
+        var result = quizService.ValidateAnswer(token, quizId, questionId, inputDto);
 
         return Ok(result);
+    }
+
+    [Authorize]
+    [HttpPost("/quizzes/{quizId}")]
+    public ActionResult CompleteQuizAttempt(Guid quizId)
+    {
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
+
+        quizService.CompleteQuizAttempt(token, quizId);
+
+        return Ok();
     }
 }

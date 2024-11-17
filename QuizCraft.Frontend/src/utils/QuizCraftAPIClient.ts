@@ -75,14 +75,14 @@ export class Client {
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-                let result200: any = null;
-                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result200 = QuizDto.fromJS(resultData200);
-                return result200;
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = QuizDto.fromJS(resultData200);
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
         return Promise.resolve<QuizDto>(null as any);
@@ -112,21 +112,21 @@ export class Client {
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-                let result200: any = null;
-                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                if (Array.isArray(resultData200)) {
-                    result200 = [] as any;
-                    for (let item of resultData200)
-                        result200!.push(QuizDto.fromJS(item));
-                }
-                else {
-                    result200 = <any>null;
-                }
-                return result200;
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            if (Array.isArray(resultData200)) {
+                result200 = [] as any;
+                for (let item of resultData200)
+                    result200!.push(QuizDto.fromJS(item));
+            }
+            else {
+                result200 = <any>null;
+            }
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
         return Promise.resolve<QuizDto[]>(null as any);
@@ -159,14 +159,14 @@ export class Client {
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-                let result200: any = null;
-                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result200 = QuizDto.fromJS(resultData200);
-                return result200;
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = QuizDto.fromJS(resultData200);
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
         return Promise.resolve<QuizDto>(null as any);
@@ -175,7 +175,7 @@ export class Client {
     /**
      * @return Success
      */
-    questionsAll(id: string): Promise<QuestionDto[]> {
+    questionsGET(id: string): Promise<DetailedQuizDto> {
         let url_ = this.baseUrl + "/quizzes/{id}/questions";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -190,40 +190,33 @@ export class Client {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processQuestionsAll(_response);
+            return this.processQuestionsGET(_response);
         });
     }
 
-    protected processQuestionsAll(response: Response): Promise<QuestionDto[]> {
+    protected processQuestionsGET(response: Response): Promise<DetailedQuizDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-                let result200: any = null;
-                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                if (Array.isArray(resultData200)) {
-                    result200 = [] as any;
-                    for (let item of resultData200)
-                        result200!.push(QuestionDto.fromJS(item));
-                }
-                else {
-                    result200 = <any>null;
-                }
-                return result200;
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DetailedQuizDto.fromJS(resultData200);
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<QuestionDto[]>(null as any);
+        return Promise.resolve<DetailedQuizDto>(null as any);
     }
 
     /**
      * @param body (optional) 
      * @return Success
      */
-    questions(quizId: string, questionId: string, body: AnswerValidationInputDto | undefined): Promise<AnswerValidationDto> {
+    questionsPOST(quizId: string, questionId: string, body: AnswerAttemptDto | undefined): Promise<ValidatedAnswerDto> {
         let url_ = this.baseUrl + "/quizzes/{quizId}/questions/{questionId}";
         if (quizId === undefined || quizId === null)
             throw new Error("The parameter 'quizId' must be defined.");
@@ -245,32 +238,104 @@ export class Client {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processQuestions(_response);
+            return this.processQuestionsPOST(_response);
         });
     }
 
-    protected processQuestions(response: Response): Promise<AnswerValidationDto> {
+    protected processQuestionsPOST(response: Response): Promise<ValidatedAnswerDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
-                let result200: any = null;
-                let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                result200 = AnswerValidationDto.fromJS(resultData200);
-                return result200;
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = ValidatedAnswerDto.fromJS(resultData200);
+            return result200;
             });
         } else if (status !== 200 && status !== 204) {
             return response.text().then((_responseText) => {
-                return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<AnswerValidationDto>(null as any);
+        return Promise.resolve<ValidatedAnswerDto>(null as any);
+    }
+
+    /**
+     * @return Success
+     */
+    quizzesPOST2(quizId: string): Promise<void> {
+        let url_ = this.baseUrl + "/quizzes/{quizId}";
+        if (quizId === undefined || quizId === null)
+            throw new Error("The parameter 'quizId' must be defined.");
+        url_ = url_.replace("{quizId}", encodeURIComponent("" + quizId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "POST",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processQuizzesPOST2(_response);
+        });
+    }
+
+    protected processQuizzesPOST2(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
     }
 }
 
+export class AnswerAttemptDto implements IAnswerAttemptDto {
+    answerId?: string;
+
+    constructor(data?: IAnswerAttemptDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.answerId = _data["answerId"];
+        }
+    }
+
+    static fromJS(data: any): AnswerAttemptDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new AnswerAttemptDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["answerId"] = this.answerId;
+        return data;
+    }
+}
+
+export interface IAnswerAttemptDto {
+    answerId?: string;
+}
+
 export class AnswerDto implements IAnswerDto {
+    id?: string;
     text?: string | undefined;
-    isCorrect?: boolean;
 
     constructor(data?: IAnswerDto) {
         if (data) {
@@ -283,8 +348,8 @@ export class AnswerDto implements IAnswerDto {
 
     init(_data?: any) {
         if (_data) {
+            this.id = _data["id"];
             this.text = _data["text"];
-            this.isCorrect = _data["isCorrect"];
         }
     }
 
@@ -297,97 +362,14 @@ export class AnswerDto implements IAnswerDto {
 
     toJSON(data?: any) {
         data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
         data["text"] = this.text;
-        data["isCorrect"] = this.isCorrect;
         return data;
     }
 }
 
 export interface IAnswerDto {
-    text?: string | undefined;
-    isCorrect?: boolean;
-}
-
-export class AnswerValidationDto implements IAnswerValidationDto {
-    selected!: string;
-    isCorrect!: boolean;
-    correctAnswer!: AnswerDto;
-
-    constructor(data?: IAnswerValidationDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-        if (!data) {
-            this.correctAnswer = new AnswerDto();
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.selected = _data["selected"];
-            this.isCorrect = _data["isCorrect"];
-            this.correctAnswer = _data["correctAnswer"] ? AnswerDto.fromJS(_data["correctAnswer"]) : new AnswerDto();
-        }
-    }
-
-    static fromJS(data: any): AnswerValidationDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new AnswerValidationDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["selected"] = this.selected;
-        data["isCorrect"] = this.isCorrect;
-        data["correctAnswer"] = this.correctAnswer ? this.correctAnswer.toJSON() : <any>undefined;
-        return data;
-    }
-}
-
-export interface IAnswerValidationDto {
-    selected: string;
-    isCorrect: boolean;
-    correctAnswer: AnswerDto;
-}
-
-export class AnswerValidationInputDto implements IAnswerValidationInputDto {
-    text?: string | undefined;
-
-    constructor(data?: IAnswerValidationInputDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.text = _data["text"];
-        }
-    }
-
-    static fromJS(data: any): AnswerValidationInputDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new AnswerValidationInputDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["text"] = this.text;
-        return data;
-    }
-}
-
-export interface IAnswerValidationInputDto {
+    id?: string;
     text?: string | undefined;
 }
 
@@ -414,10 +396,69 @@ export enum Category {
     Travel = "Travel",
 }
 
+export class DetailedQuizDto implements IDetailedQuizDto {
+    id!: string;
+    title!: string;
+    currentQuestionId!: string;
+    questions!: QuestionDto[];
+
+    constructor(data?: IDetailedQuizDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+        if (!data) {
+            this.questions = [];
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.title = _data["title"];
+            this.currentQuestionId = _data["currentQuestionId"];
+            if (Array.isArray(_data["questions"])) {
+                this.questions = [] as any;
+                for (let item of _data["questions"])
+                    this.questions!.push(QuestionDto.fromJS(item));
+            }
+        }
+    }
+
+    static fromJS(data: any): DetailedQuizDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DetailedQuizDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["title"] = this.title;
+        data["currentQuestionId"] = this.currentQuestionId;
+        if (Array.isArray(this.questions)) {
+            data["questions"] = [];
+            for (let item of this.questions)
+                data["questions"].push(item.toJSON());
+        }
+        return data;
+    }
+}
+
+export interface IDetailedQuizDto {
+    id: string;
+    title: string;
+    currentQuestionId: string;
+    questions: QuestionDto[];
+}
+
 export class QuestionDto implements IQuestionDto {
     id!: string;
     text!: string;
-    answers!: string[];
+    answers!: AnswerDto[];
 
     constructor(data?: IQuestionDto) {
         if (data) {
@@ -438,7 +479,7 @@ export class QuestionDto implements IQuestionDto {
             if (Array.isArray(_data["answers"])) {
                 this.answers = [] as any;
                 for (let item of _data["answers"])
-                    this.answers!.push(item);
+                    this.answers!.push(AnswerDto.fromJS(item));
             }
         }
     }
@@ -457,7 +498,7 @@ export class QuestionDto implements IQuestionDto {
         if (Array.isArray(this.answers)) {
             data["answers"] = [];
             for (let item of this.answers)
-                data["answers"].push(item);
+                data["answers"].push(item.toJSON());
         }
         return data;
     }
@@ -466,7 +507,7 @@ export class QuestionDto implements IQuestionDto {
 export interface IQuestionDto {
     id: string;
     text: string;
-    answers: string[];
+    answers: AnswerDto[];
 }
 
 export class QuizDto implements IQuizDto {
@@ -475,7 +516,6 @@ export class QuizDto implements IQuizDto {
     title!: string;
     category!: Category;
     questionCount!: number;
-    nextUnansweredQuestionIndex?: number;
 
     constructor(data?: IQuizDto) {
         if (data) {
@@ -493,7 +533,6 @@ export class QuizDto implements IQuizDto {
             this.title = _data["title"];
             this.category = _data["category"];
             this.questionCount = _data["questionCount"];
-            this.nextUnansweredQuestionIndex = _data["nextUnansweredQuestionIndex"];
         }
     }
 
@@ -511,7 +550,6 @@ export class QuizDto implements IQuizDto {
         data["title"] = this.title;
         data["category"] = this.category;
         data["questionCount"] = this.questionCount;
-        data["nextUnansweredQuestionIndex"] = this.nextUnansweredQuestionIndex;
         return data;
     }
 }
@@ -522,7 +560,50 @@ export interface IQuizDto {
     title: string;
     category: Category;
     questionCount: number;
-    nextUnansweredQuestionIndex?: number;
+}
+
+export class ValidatedAnswerDto implements IValidatedAnswerDto {
+    selectedAnswer!: AnswerAttemptDto;
+    correctAnswer!: AnswerDto;
+
+    constructor(data?: IValidatedAnswerDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+        if (!data) {
+            this.selectedAnswer = new AnswerAttemptDto();
+            this.correctAnswer = new AnswerDto();
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.selectedAnswer = _data["selectedAnswer"] ? AnswerAttemptDto.fromJS(_data["selectedAnswer"]) : new AnswerAttemptDto();
+            this.correctAnswer = _data["correctAnswer"] ? AnswerDto.fromJS(_data["correctAnswer"]) : new AnswerDto();
+        }
+    }
+
+    static fromJS(data: any): ValidatedAnswerDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new ValidatedAnswerDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["selectedAnswer"] = this.selectedAnswer ? this.selectedAnswer.toJSON() : <any>undefined;
+        data["correctAnswer"] = this.correctAnswer ? this.correctAnswer.toJSON() : <any>undefined;
+        return data;
+    }
+}
+
+export interface IValidatedAnswerDto {
+    selectedAnswer: AnswerAttemptDto;
+    correctAnswer: AnswerDto;
 }
 
 export class ApiException extends Error {

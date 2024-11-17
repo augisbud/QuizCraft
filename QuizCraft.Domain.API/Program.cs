@@ -9,6 +9,7 @@ using AutoMapper.EquivalencyExpression;
 using QuizCraft.Domain.API.Filters;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -56,6 +57,7 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<SwaggerFileUploadOperationFilter>();
 });
 
+builder.Services.AddScoped<JwtSecurityTokenHandler>();
 builder.Services.AddScoped<IFileProcessingService, FileProcessingService>();
 
 builder.Services.AddHealthChecks();

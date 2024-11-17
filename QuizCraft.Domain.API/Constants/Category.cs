@@ -2,7 +2,6 @@ using System.Text.Json.Serialization;
 
 namespace QuizCraft.Domain.API.Constants;
 
-// 2. Creating and using your own enum
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum Category
 {

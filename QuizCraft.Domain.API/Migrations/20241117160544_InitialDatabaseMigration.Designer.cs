@@ -12,7 +12,7 @@ using QuizCraft.Domain.API.Data;
 namespace QuizCraft.Domain.API.Migrations
 {
     [DbContext(typeof(QuizzesDbContext))]
-    [Migration("20241020055330_InitialDatabaseMigration")]
+    [Migration("20241117160544_InitialDatabaseMigration")]
     partial class InitialDatabaseMigration
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace QuizCraft.Domain.API.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -86,6 +86,61 @@ namespace QuizCraft.Domain.API.Migrations
                     b.ToTable("Quizzes");
                 });
 
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAnswerAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AnswerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("QuestionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("QuizAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AnswerId");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("QuizAttemptId");
+
+                    b.ToTable("QuizAnswerAttempts");
+                });
+
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("boolean");
+
+                    b.Property<Guid>("QuizId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserEmail")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuizId");
+
+                    b.ToTable("QuizAttempts");
+                });
+
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.Answer", b =>
                 {
                     b.HasOne("QuizCraft.Domain.API.Entities.Question", "Question")
@@ -108,6 +163,44 @@ namespace QuizCraft.Domain.API.Migrations
                     b.Navigation("Quiz");
                 });
 
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAnswerAttempt", b =>
+                {
+                    b.HasOne("QuizCraft.Domain.API.Entities.Answer", "Answer")
+                        .WithMany()
+                        .HasForeignKey("AnswerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizCraft.Domain.API.Entities.Question", "Question")
+                        .WithMany()
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuizCraft.Domain.API.Entities.QuizAttempt", "QuizAttempt")
+                        .WithMany("QuizAnswerAttempts")
+                        .HasForeignKey("QuizAttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Answer");
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuizAttempt");
+                });
+
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAttempt", b =>
+                {
+                    b.HasOne("QuizCraft.Domain.API.Entities.Quiz", "Quiz")
+                        .WithMany()
+                        .HasForeignKey("QuizId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Quiz");
+                });
+
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.Question", b =>
                 {
                     b.Navigation("Answers");
@@ -116,6 +209,11 @@ namespace QuizCraft.Domain.API.Migrations
             modelBuilder.Entity("QuizCraft.Domain.API.Entities.Quiz", b =>
                 {
                     b.Navigation("Questions");
+                });
+
+            modelBuilder.Entity("QuizCraft.Domain.API.Entities.QuizAttempt", b =>
+                {
+                    b.Navigation("QuizAnswerAttempts");
                 });
 #pragma warning restore 612, 618
         }
