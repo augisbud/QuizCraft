@@ -77,7 +77,6 @@ public class Candidate
     public required Content Content { get; set; }
     public required string FinishReason { get; set; }
     public int? Index { get; set; }
-    public required List<SafetyRating> SafetyRatings { get; set; }
 }
 
 public class UsageMetadata
@@ -91,12 +90,6 @@ public class Content
 {
     public required List<Part> Parts { get; set; }
     public required string? Role { get; set; }
-}
-
-public class SafetyRating
-{
-    public required string Category { get; set; }
-    public required string Probability { get; set; }
 }
 
 // 2. Creating and using your own struct
