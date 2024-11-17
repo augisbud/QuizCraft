@@ -62,27 +62,3 @@ jobs:
       - name: Push Docker image
         run: |
           docker push ghcr.io/augisbud/quizcraft/backend:latest
-
-  CD:
-    runs-on: ubuntu-latest
-    needs: CI
-
-    steps:
-      - name: Deploy to Remote Server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SSH_HOST }}
-          port: ${{ secrets.SSH_PORT }}
-          username: ${{ secrets.SSH_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            docker pull ghcr.io/augisbud/quizcraft/backend:latest
-            docker stop backend || true
-            docker rm backend || true
-            docker run -d --name backend --network internal --restart unless-stopped -p 8080:8080 \
-              -e Authentication__Google__ClientId="${{ secrets.GOOGLE_CLIENT_ID }}" \
-              -e Authentication__Google__ClientSecret="${{ secrets.GOOGLE_CLIENT_SECRET }}" \
-              -e ConnectionStrings__DefaultConnection="${{ secrets.CONNECTION_STRING }}" \
-              -e GeminiAPIKey="${{ secrets.GEMINI_API_KEY }}" \
-              -e Frontend__Url="${{ secrets.FRONTEND_URL }}" \
-              ghcr.io/augisbud/quizcraft/backend:latest
