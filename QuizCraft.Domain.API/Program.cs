@@ -87,7 +87,7 @@ var app = builder.Build();
 app.UseCors("AllowFrontend");
 
 app.UseSwagger();
-app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "QuizCraft API v1"));
+app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
 
