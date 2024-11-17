@@ -1,0 +1,1 @@
+export const BackendUri = !window.location.hostname.includes("localhost") ? "https://quizcraft.zzzz.lt/api" : "https://localhost:8080";

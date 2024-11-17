@@ -5,6 +5,7 @@ import { CloudUpload } from "@mui/icons-material";
 import styles from "./CreateQuiz.module.scss";
 import { useNavigate } from "react-router-dom";
 import { QuizDto } from "../../utils/QuizCraftAPIClient";
+import { BackendUri } from "../../utils/Environment";
 
 export const CreateQuiz = () => {
   const navigate = useNavigate();
@@ -37,7 +38,7 @@ export const CreateQuiz = () => {
         try {
             const token = sessionStorage.getItem("token");
 
-            const response = await fetch("https://localhost:8080/quizzes", {
+            const response = await fetch(`${BackendUri}/quizzes`, {
                 method: "POST",
                 body: formData,
                 headers: {

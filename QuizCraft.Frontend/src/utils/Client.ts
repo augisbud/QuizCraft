@@ -1,3 +1,4 @@
+import { BackendUri } from "./Environment";
 import { Client } from "./QuizCraftAPIClient";
 
 const httpClient = {
@@ -13,4 +14,4 @@ const httpClient = {
     }
 };
 
-export const client = new Client("https://localhost:8080", httpClient);
+export const client = new Client(BackendUri, httpClient);
