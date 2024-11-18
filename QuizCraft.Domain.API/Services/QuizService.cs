@@ -14,19 +14,7 @@ namespace QuizCraft.Domain.API.Services;
 
 public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuizRepository repository, JwtSecurityTokenHandler jwtSecurityTokenHandler) : IQuizService
 {
-    public IEnumerable<QuizDto> RetrieveQuizzes()
-    {
-        var quizzes = repository.RetrieveQuizzes();
-
-        return quizzes;
-    }
-
-    public QuizDto RetrieveQuizById(Guid id)
-    {
-        return repository.RetrieveQuizById(id) ?? throw new QuizNotFoundException(id);
-    }
-
-    public async Task<QuizDto> CreateQuizAsync(string source)
+    public async Task<Guid> CreateQuizAsync(string source, string token)
     {
         var response = await geminiAPIClient.PostAsync(GeminiAPITemplates.GeneratePrompt(source));
 
@@ -35,10 +23,21 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
         var data = JsonSerializer.Deserialize<QuizDtoForCreation>(jsonString) ?? throw new InsufficientDataException();
 
         var mappedData = mapper.Map<Quiz>(data);
+        mappedData.CreatedBy = token.RetrieveEmail(jwtSecurityTokenHandler);
 
         var quiz = await repository.CreateQuizAsync(mappedData);
 
-        return mapper.Map<QuizDto>(quiz);
+        return quiz.Id;
+    }
+
+    public IEnumerable<QuizDto> RetrieveQuizzes(string? token)
+    {
+        var quizzes = repository.RetrieveQuizzes().ToList();
+
+        if(token != null)
+            quizzes.Where(x => x.CreatedBy == token.RetrieveEmail(jwtSecurityTokenHandler)).ToList().ForEach(quiz => quiz.IsOwner = true);
+
+        return quizzes;
     }
 
     public DetailedQuizDto RetrieveQuestions(Guid quizId, string token)
@@ -50,7 +49,7 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
         var currentQuestionId = quiz.Questions.First().Id;
 
-        var quizAttempt = quiz.QuizAttempts.FirstOrDefault(x => !x.IsCompleted && x.UserEmail == RetrieveEmail(jwtSecurityTokenHandler, token));
+        var quizAttempt = quiz.QuizAttempts.FirstOrDefault(x => !x.IsCompleted && x.UserEmail == token.RetrieveEmail(jwtSecurityTokenHandler));
         if(quizAttempt != null)
         {
             var answeredQuestions = quizAttempt.QuizAnswerAttempts.Select(x => x.QuestionId);
@@ -78,7 +77,7 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
     {
         var answer = repository.RetrieveAnswer(quizId, questionId) ?? throw new AnswerNotFoundException(questionId);
 
-        var quizAttempt = repository.RetrieveQuizAttempt(quizId, RetrieveEmail(jwtSecurityTokenHandler, token)) ?? repository.CreateQuizAttempt(quizId, RetrieveEmail(jwtSecurityTokenHandler, token));
+        var quizAttempt = repository.RetrieveQuizAttempt(quizId, token.RetrieveEmail(jwtSecurityTokenHandler)) ?? repository.CreateQuizAttempt(quizId, token.RetrieveEmail(jwtSecurityTokenHandler));
 
         repository.CreateQuizAnswerAttempt(quizAttempt.Id, questionId, answerAttemptDto.AnswerId);
 
@@ -91,17 +90,22 @@ public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuiz
 
     public void CompleteQuizAttempt(string token, Guid quizId)
     {
-        var quizAttempt = repository.RetrieveQuizAttempt(quizId, RetrieveEmail(jwtSecurityTokenHandler, token)) ?? repository.CreateQuizAttempt(quizId, RetrieveEmail(jwtSecurityTokenHandler, token));
+        var quizAttempt = repository.RetrieveQuizAttempt(quizId, token.RetrieveEmail(jwtSecurityTokenHandler)) ?? repository.CreateQuizAttempt(quizId, token.RetrieveEmail(jwtSecurityTokenHandler));
 
         quizAttempt.IsCompleted = true;
 
         repository.SaveChanges();
     }
 
-    private static string RetrieveEmail(JwtSecurityTokenHandler jwtSecurityTokenHandler, string token)
+    public void DeleteQuiz(string token, Guid quizId)
     {
-        var jwtToken = jwtSecurityTokenHandler.ReadJwtToken(token);
+        var quiz = repository.RetrieveQuizById(quizId) ?? throw new QuizNotFoundException(quizId);
 
-        return jwtToken.Claims.First(c => c.Type == "email").Value;
+        if(quiz.CreatedBy != token.RetrieveEmail(jwtSecurityTokenHandler))
+            throw new UnauthorizedAccessException();
+
+        repository.DeleteQuiz(quiz);
+
+        repository.SaveChanges();
     }
 }

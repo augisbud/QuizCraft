@@ -10,10 +10,12 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 {
     [Authorize]
     [HttpPost("/quizzes")]
-    public async Task<ActionResult<QuizDto>> CreateQuizAsync([FromForm] IFormFile file)
+    public async Task<ActionResult<Guid>> CreateQuizAsync([FromForm] IFormFile file)
     {
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
+
         var source = await fileProcessingService.ProcessFileAsync(file);
-        var result = await quizService.CreateQuizAsync(source);
+        var result = await quizService.CreateQuizAsync(source, token);
 
         return Ok(result);
     }
@@ -21,18 +23,11 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
     [HttpGet("/quizzes")]
     public ActionResult<IEnumerable<QuizDto>> GetQuizzes()
     {
-        var result = quizService.RetrieveQuizzes();
+        var token = HttpContext.Request.Headers.Authorization.FirstOrDefault()?.Replace("Bearer ", "");
+
+        var result = quizService.RetrieveQuizzes(token);
 
         return Ok(result);
-    }
-
-    [Authorize]
-    [HttpGet("/quizzes/{id}")]
-    public ActionResult<QuizDto> GetQuizById(Guid id)
-    {
-        var quiz = quizService.RetrieveQuizById(id);
-
-        return Ok(quiz);
     }
 
     [Authorize]
@@ -65,6 +60,17 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
         quizService.CompleteQuizAttempt(token, quizId);
+
+        return Ok();
+    }
+
+    [Authorize]
+    [HttpDelete("/quizzes/{quizId}")]
+    public ActionResult DeleteQuiz(Guid quizId)
+    {
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
+
+        quizService.DeleteQuiz(token, quizId);
 
         return Ok();
     }

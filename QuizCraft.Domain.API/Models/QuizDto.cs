@@ -20,5 +20,15 @@ public class QuizDto
     [Required]
     public int QuestionCount { get; set; }
 
-    // TODO: Completion Rate; Average Score; High Score;
+    [Required]
+    public int CompletedBy { get; set; }
+
+    [Required]
+    public int? AverageScore { get; set; }
+
+    [Required]
+    public int? HighScore { get; set; }
+
+    [Required]
+    public bool IsOwner { get; set; }
 }

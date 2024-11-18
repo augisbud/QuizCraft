@@ -14,7 +14,7 @@ import { QuizNavbar } from "../../components/QuizNavbar/QuizNavbar";
 import { client } from "../../utils/Client";
 import { useEffect, useState } from "react";
 import { QuizDto } from "../../utils/QuizCraftAPIClient";
-import { Analytics, PlayCircleOutline } from "@mui/icons-material";
+import { Analytics, DeleteOutline, PlayCircleOutline } from "@mui/icons-material";
 import { individualAnalyticsDialogVar } from "../../utils/Cache";
 import { IndividualAnalytics } from "../../components/IndividualAnalytics/IndividualAnalytics";
 
@@ -51,6 +51,9 @@ export const Quizzes = () => {
                 <TableCell>Quiz name</TableCell>
                 <TableCell>Category</TableCell>
                 <TableCell>Questions</TableCell>
+                <TableCell>Completed By</TableCell>
+                <TableCell>Average Score</TableCell>
+                <TableCell>High Score</TableCell>
                 <TableCell align="center">Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -65,7 +68,10 @@ export const Quizzes = () => {
                   </TableCell>
                   <TableCell>{row.title}</TableCell>
                   <TableCell>{row.category}</TableCell>
-                  <TableCell align="right">{row.questionCount}</TableCell>
+                  <TableCell>{row.questionCount}</TableCell>
+                  <TableCell>{row.completedBy}</TableCell>
+                  <TableCell>{row.averageScore ?? 0}/{row.questionCount}</TableCell>
+                  <TableCell>{row.highScore ?? 0}/{row.questionCount}</TableCell>
                   <TableCell align="center">
                     <Link to={`/quizzes/${row.id}`} style={{ textDecoration: "none" }}>
                       <PlayCircleOutline fontSize="large" />
@@ -73,6 +79,16 @@ export const Quizzes = () => {
                     <span onClick={() => individualAnalyticsDialogVar.set(row.id)}>
                       <Analytics fontSize="large" />
                     </span>
+                    { row.isOwner &&
+                       <span onClick={() => {
+                          setQuizzes(quizzes.filter(quiz => quiz.id !== row.id))
+                          
+                          client.quizzesDELETE(row.id)
+                       }}>
+                          <DeleteOutline fontSize="large" />
+                       </span>
+                    }
+                   
                   </TableCell>
                 </TableRow>
               ))}

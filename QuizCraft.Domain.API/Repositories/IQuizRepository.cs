@@ -6,15 +6,16 @@ namespace QuizCraft.Domain.API.Repositories;
 public interface IQuizRepository
 {
     Task<Quiz> CreateQuizAsync(Quiz quiz);
-    QuizDto? RetrieveQuizById(Guid id);
+    Quiz? RetrieveQuizById(Guid id);
     Quiz? RetrieveQuizWithQuestionsById(Guid id);
     IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId);
     AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId);
-    IEnumerable<QuizDto> RetrieveQuizzes();
+    IEnumerable<QuizForTransferDto> RetrieveQuizzes();
     QuizAttempt? RetrieveQuizAttempt(Guid quizId, string email);
     IEnumerable<QuizAttempt> RetrieveQuizAttempts(Guid quizId, string email);
     QuizAttempt CreateQuizAttempt(Guid quizId, string email);
     IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempt(Guid attemptId);
     QuizAnswerAttempt CreateQuizAnswerAttempt(Guid attemptId, Guid questionId, Guid answerId);
+    void DeleteQuiz(Quiz quiz);
     bool SaveChanges();
 }
