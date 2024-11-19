@@ -4,10 +4,10 @@ namespace QuizCraft.Domain.API.Services;
 
 public interface IQuizService
 {
-    Task<QuizDto> CreateQuizAsync(string source);
-    QuizDto RetrieveQuizById(Guid id);
+    Task<Guid> CreateQuizAsync(string source, string token);
+    IEnumerable<QuizDto> RetrieveQuizzes(string? token);
     DetailedQuizDto RetrieveQuestions(Guid quizId, string token);
-    IEnumerable<QuizDto> RetrieveQuizzes();
     ValidatedAnswerDto ValidateAnswer(string token, Guid quizId, Guid questionId, AnswerAttemptDto answerAttemptDto);
     void CompleteQuizAttempt(string token, Guid quizId);
+    void DeleteQuiz(string token, Guid quizId);
 }

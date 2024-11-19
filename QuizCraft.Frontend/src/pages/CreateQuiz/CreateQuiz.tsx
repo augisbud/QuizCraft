@@ -1,21 +1,20 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Navbar } from "../../components/Navbar/Navbar";
-import { Button, styled } from "@mui/material";
+import { Button, styled, CircularProgress } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import styles from "./CreateQuiz.module.scss";
 import { useNavigate } from "react-router-dom";
-import { QuizDto } from "../../utils/QuizCraftAPIClient";
 import { BackendUri } from "../../utils/Environment";
 
 export const CreateQuiz = () => {
   const navigate = useNavigate();
+  const [file, setFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!sessionStorage.getItem("token"))
       navigate("/signin?redirect=/create-quiz");
-  }, [navigate])
-
-  const [file, setFile] = useState<File | null>(null);
+  }, [navigate]);
 
   const handleFileChange = async (event: ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -32,6 +31,8 @@ export const CreateQuiz = () => {
       return;
     }
 
+    setLoading(true);
+
     const formData = new FormData();
     formData.append("file", fileToUpload);
 
@@ -47,8 +48,8 @@ export const CreateQuiz = () => {
       });
 
       if (response.ok) {
-        const quiz = (await response.json()) as QuizDto;
-        navigate(`/quizzes/${quiz.id}`);
+        const id = (await response.json()) as string;
+        navigate(`/quizzes/${id}`);
       } else if (response.status === 401) {
         alert("You are not authorized. Please sign in.");
         navigate("/signin");
@@ -58,9 +59,10 @@ export const CreateQuiz = () => {
     } catch (error) {
       console.error("Error during file upload:", error);
       alert("An error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
-
 
   const VisuallyHiddenInput = styled("input")({
     clip: "rect(0 0 0 0)",
@@ -79,20 +81,24 @@ export const CreateQuiz = () => {
       <Navbar />
       <div className={styles.mainContainer}>
         <div className={styles.quizUploaderContainer}>
-          <div className={styles.uploadSection}>
-            <h3>Upload File</h3>
-            <Button
-              component="label"
-              role={undefined}
-              variant="contained"
-              tabIndex={-1}
-              startIcon={<CloudUpload />}
-            >
-              Upload Quiz
-              <VisuallyHiddenInput type="file" onChange={handleFileChange} />
-            </Button>
-            {file && <p>Selected File: {file.name}</p>}
-          </div>
+          {loading ? (
+            <CircularProgress />
+          ) : (
+            <div className={styles.uploadSection}>
+              <h3>Upload File</h3>
+              <Button
+                component="label"
+                role={undefined}
+                variant="contained"
+                tabIndex={-1}
+                startIcon={<CloudUpload />}
+              >
+                Upload Quiz
+                <VisuallyHiddenInput type="file" onChange={handleFileChange} />
+              </Button>
+              {file && <p>Selected File: {file.name}</p>}
+            </div>
+          )}
         </div>
       </div>
     </>

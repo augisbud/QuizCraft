@@ -27,7 +27,7 @@ export class Client {
      * @param fileName (optional) 
      * @return Success
      */
-    quizzesPOST(contentType: string | undefined, contentDisposition: string | undefined, headers: { [key: string]: string[]; } | undefined, length: number | undefined, name: string | undefined, fileName: string | undefined): Promise<QuizDto> {
+    quizzesPOST(contentType: string | undefined, contentDisposition: string | undefined, headers: { [key: string]: string[]; } | undefined, length: number | undefined, name: string | undefined, fileName: string | undefined): Promise<string> {
         let url_ = this.baseUrl + "/quizzes";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -70,14 +70,15 @@ export class Client {
         });
     }
 
-    protected processQuizzesPOST(response: Response): Promise<QuizDto> {
+    protected processQuizzesPOST(response: Response): Promise<string> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = QuizDto.fromJS(resultData200);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
             return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -85,7 +86,7 @@ export class Client {
             return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<QuizDto>(null as any);
+        return Promise.resolve<string>(null as any);
     }
 
     /**
@@ -130,46 +131,6 @@ export class Client {
             });
         }
         return Promise.resolve<QuizDto[]>(null as any);
-    }
-
-    /**
-     * @return Success
-     */
-    quizzesGET(id: string): Promise<QuizDto> {
-        let url_ = this.baseUrl + "/quizzes/{id}";
-        if (id === undefined || id === null)
-            throw new Error("The parameter 'id' must be defined.");
-        url_ = url_.replace("{id}", encodeURIComponent("" + id));
-        url_ = url_.replace(/[?&]$/, "");
-
-        let options_: RequestInit = {
-            method: "GET",
-            headers: {
-                "Accept": "text/plain"
-            }
-        };
-
-        return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processQuizzesGET(_response);
-        });
-    }
-
-    protected processQuizzesGET(response: Response): Promise<QuizDto> {
-        const status = response.status;
-        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
-        if (status === 200) {
-            return response.text().then((_responseText) => {
-            let result200: any = null;
-            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-            result200 = QuizDto.fromJS(resultData200);
-            return result200;
-            });
-        } else if (status !== 200 && status !== 204) {
-            return response.text().then((_responseText) => {
-            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
-            });
-        }
-        return Promise.resolve<QuizDto>(null as any);
     }
 
     /**
@@ -299,7 +260,43 @@ export class Client {
     /**
      * @return Success
      */
-    quizzesGET2(id: string): Promise<QuizAttemptsDto> {
+    quizzesDELETE(quizId: string): Promise<void> {
+        let url_ = this.baseUrl + "/quizzes/{quizId}";
+        if (quizId === undefined || quizId === null)
+            throw new Error("The parameter 'quizId' must be defined.");
+        url_ = url_.replace("{quizId}", encodeURIComponent("" + quizId));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "DELETE",
+            headers: {
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processQuizzesDELETE(_response);
+        });
+    }
+
+    protected processQuizzesDELETE(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * @return Success
+     */
+    quizzesGET(id: string): Promise<QuizAttemptsDto> {
         let url_ = this.baseUrl + "/statistics/individual/quizzes/{id}";
         if (id === undefined || id === null)
             throw new Error("The parameter 'id' must be defined.");
@@ -314,11 +311,11 @@ export class Client {
         };
 
         return this.http.fetch(url_, options_).then((_response: Response) => {
-            return this.processQuizzesGET2(_response);
+            return this.processQuizzesGET(_response);
         });
     }
 
-    protected processQuizzesGET2(response: Response): Promise<QuizAttemptsDto> {
+    protected processQuizzesGET(response: Response): Promise<QuizAttemptsDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
@@ -655,6 +652,10 @@ export class QuizDto implements IQuizDto {
     title!: string;
     category!: Category;
     questionCount!: number;
+    completedBy!: number;
+    averageScore!: number;
+    highScore!: number;
+    isOwner!: boolean;
 
     constructor(data?: IQuizDto) {
         if (data) {
@@ -672,6 +673,10 @@ export class QuizDto implements IQuizDto {
             this.title = _data["title"];
             this.category = _data["category"];
             this.questionCount = _data["questionCount"];
+            this.completedBy = _data["completedBy"];
+            this.averageScore = _data["averageScore"];
+            this.highScore = _data["highScore"];
+            this.isOwner = _data["isOwner"];
         }
     }
 
@@ -689,6 +694,10 @@ export class QuizDto implements IQuizDto {
         data["title"] = this.title;
         data["category"] = this.category;
         data["questionCount"] = this.questionCount;
+        data["completedBy"] = this.completedBy;
+        data["averageScore"] = this.averageScore;
+        data["highScore"] = this.highScore;
+        data["isOwner"] = this.isOwner;
         return data;
     }
 }
@@ -699,6 +708,10 @@ export interface IQuizDto {
     title: string;
     category: Category;
     questionCount: number;
+    completedBy: number;
+    averageScore: number;
+    highScore: number;
+    isOwner: boolean;
 }
 
 export class ValidatedAnswerDto implements IValidatedAnswerDto {

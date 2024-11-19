@@ -18,19 +18,20 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         return result.Entity;
     }
 
-    public IEnumerable<QuizDto> RetrieveQuizzes()
+    public IEnumerable<QuizForTransferDto> RetrieveQuizzes()
     {
         var data = context.Quizzes
-            .ProjectTo<QuizDto>(mapper.ConfigurationProvider);
+            .ProjectTo<QuizForTransferDto>(mapper.ConfigurationProvider);
 
         return data;
     }
 
-    public QuizDto? RetrieveQuizById(Guid id)
+    public Quiz? RetrieveQuizById(Guid id)
     {
         var data = context.Quizzes
+            .Include(quiz => quiz.Questions)
+            .ThenInclude(question => question.Answers)
             .Where(quiz => quiz.Id == id)
-            .ProjectTo<QuizDto>(mapper.ConfigurationProvider)
             .FirstOrDefault();
 
         return data;
@@ -116,6 +117,13 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : IQuizRep
         context.SaveChanges();
 
         return result.Entity;
+    }
+
+    public void DeleteQuiz(Quiz quiz)
+    {
+        context.Quizzes.Remove(quiz);
+
+        context.SaveChanges();
     }
 
     public bool SaveChanges()
