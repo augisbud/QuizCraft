@@ -15,6 +15,9 @@ public class Quiz
     public required Category Category { get; set; }
 
     [Required]
+    public required string CreatedBy { get; set; }
+
+    [Required]
     public DateTime CreatedAt { get; } = DateTime.UtcNow;
     
     public ICollection<Question> Questions { get; set; } = [];

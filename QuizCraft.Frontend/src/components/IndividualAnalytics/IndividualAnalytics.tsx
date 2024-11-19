@@ -30,7 +30,7 @@ export const IndividualAnalytics = () => {
 
     useEffect(() => {
         const fetchQuizAttempts = async () => {
-            const data = await client.quizzesGET2(individualAnalyticsDialog!);
+            const data = await client.quizzesGET(individualAnalyticsDialog!);
 
             setQuizAttempts(data);
         };
