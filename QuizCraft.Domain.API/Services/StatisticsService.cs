@@ -27,4 +27,18 @@ public class StatisticsService(IQuizRepository repository, JwtSecurityTokenHandl
 
         return jwtToken.Claims.First(c => c.Type == "email").Value;
     }
+
+    public async Task<GlobalStatsDto> GetGlobalStatisticsAsync()
+    {
+        var totalUsers = await repository.GetTotalUsersAsync();
+        var totalQuizzesCreated = await repository.GetTotalQuizzesCreatedAsync();
+        var quizzesPerUser = await repository.GetAverageQuizzesTakenPerUserAsync();
+
+        return new GlobalStatsDto
+        {
+            TotalUsers = totalUsers,
+            TotalQuizzesCreated = totalQuizzesCreated,
+            AverageQuizzesPerUser = quizzesPerUser
+        };
+    }
 }

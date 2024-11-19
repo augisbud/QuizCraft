@@ -17,4 +17,7 @@ public interface IQuizRepository
     IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempt(Guid attemptId);
     QuizAnswerAttempt CreateQuizAnswerAttempt(Guid attemptId, Guid questionId, Guid answerId);
     bool SaveChanges();
+    Task<int> GetTotalUsersAsync();
+    Task<int> GetTotalQuizzesCreatedAsync();
+    Task<double> GetAverageQuizzesTakenPerUserAsync();
 }
