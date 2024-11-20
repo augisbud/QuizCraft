@@ -13,3 +13,8 @@ export interface QuizDto {
     questions: QuestionDto[];
     nextUnansweredQuestionIndex: number;
 }
+
+export interface StatisticDto {
+    label: string;
+    value: string;
+}

@@ -4,6 +4,7 @@ using QuizCraft.Domain.API.Exceptions;
 using QuizCraft.Domain.API.Extensions;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Repositories;
+using System.Collections.Concurrent;
 
 namespace QuizCraft.Domain.API.Services;
 
@@ -29,17 +30,30 @@ public class StatisticsService(IQuizRepository repository, JwtSecurityTokenHandl
         return jwtToken.Claims.First(c => c.Type == "email").Value;
     }
 
-    public async Task<GlobalStatsDto> GetGlobalStatisticsAsync()
+    public async Task<IEnumerable<StatisticDto>> GetGlobalStatisticsAsync()
     {
         var totalUsers = await repository.GetTotalUsersAsync();
-        var totalQuizzesCreated = await repository.GetTotalQuizzesCreatedAsync();
-        var quizzesPerUser = await repository.GetAverageQuizzesTakenPerUserAsync();
+        var totalQuizzes = await repository.GetTotalQuizzesCreatedAsync();
+        var averageQuizzes = await repository.GetAverageQuizzesTakenPerUserAsync();
 
-        return new GlobalStatsDto
+        var statistics = new ConcurrentBag<StatisticDto>
         {
-            TotalUsers = totalUsers,
-            TotalQuizzesCreated = totalQuizzesCreated,
-            AverageQuizzesPerUser = quizzesPerUser
+            new StatisticDto
+            {
+                Label = "Total Users",
+                Value = totalUsers.ToString()
+            },
+            new StatisticDto
+            {
+                Label = "Total Quizzes Created",
+                Value = totalQuizzes.ToString()
+            },
+            new StatisticDto
+            {
+                Label = "Average Quizzes Per User",
+                Value = averageQuizzes.ToString("F2")
+            }
         };
+        return statistics;
     }
 }

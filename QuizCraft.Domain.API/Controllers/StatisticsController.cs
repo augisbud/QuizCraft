@@ -21,7 +21,7 @@ public class StatisticsController(IStatisticsService service) : ControllerBase
     }
 
     [HttpGet("global")]
-    public async Task<ActionResult<GlobalStatsDto>> GetGlobalStatistics()
+    public async Task<ActionResult<IEnumerable<StatisticDto>>> GetGlobalStatistics()
     {
         try
         {
@@ -36,9 +36,7 @@ public class StatisticsController(IStatisticsService service) : ControllerBase
         }
         catch (Exception ex)
         {
-            // Log the exception
             Console.WriteLine(ex);
-
             return StatusCode(500, "An unexpected error occurred.");
         }
     }

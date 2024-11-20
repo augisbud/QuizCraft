@@ -5,5 +5,5 @@ namespace QuizCraft.Domain.API.Services;
 public interface IStatisticsService
 {
     QuizAttemptsDto QuizAttemptsForUser(string token, Guid quizId);
-    Task<GlobalStatsDto> GetGlobalStatisticsAsync();
+    Task<IEnumerable<StatisticDto>> GetGlobalStatisticsAsync();
 }
