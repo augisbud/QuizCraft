@@ -1,4 +1,5 @@
 using System.Text.Json;
+using QuizCraft.Domain.API.Exceptions;
 
 namespace QuizCraft.Domain.API.APIClients;
 
@@ -8,8 +9,8 @@ public interface IGeminiAPIClient
 }
 
 public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient) : IGeminiAPIClient
-{   
-    private readonly string APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new NotImplementedException();
+{
+    private readonly string APIKey = configuration.GetValue<string>("GeminiAPIKey") ?? throw new MissingConfigurationException("GeminiAPIKey");
     private readonly JsonSerializerOptions jsonSerializerOptions = new() { PropertyNameCaseInsensitive = true };
     private readonly HttpClient httpClient = httpClient;
 
@@ -26,34 +27,23 @@ public class GeminiAPIClient(IConfiguration configuration, HttpClient httpClient
             ]
         );
 
-        try
+        var response = await httpClient.PostAsJsonAsync($"{httpClient.BaseAddress}?key={APIKey}", input);
+
+        if (!response.IsSuccessStatusCode)
         {
-            var response = await httpClient.PostAsJsonAsync($"{httpClient.BaseAddress}?key={APIKey}", input);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.StatusCode}).");
-            }
-
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-
-            var result = JsonSerializer.Deserialize<Output>(jsonResponse, jsonSerializerOptions);
-
-            if (result == null || result.Candidates.Count == 0)
-            {
-                throw new Exception("Received an empty or invalid response from the Gemini API.");
-            }
-
-            return result;
+            throw new HttpRequestException($"Response status code does not indicate success: {(int)response.StatusCode} ({response.StatusCode}).");
         }
-        catch (HttpRequestException ex)
+
+        var jsonResponse = await response.Content.ReadAsStringAsync();
+
+        var result = JsonSerializer.Deserialize<Output>(jsonResponse, jsonSerializerOptions);
+
+        if (result == null || result.Candidates.Count == 0)
         {
-            throw new HttpRequestException("Error while calling Gemini API: " + ex.Message, ex);
+            throw new HttpRequestException("Received an empty or invalid response from the Gemini API.");
         }
-        catch (Exception ex)
-        {
-            throw new Exception("An unexpected error occurred: " + ex.Message, ex);
-        }
+
+        return result;
     }
 }
 

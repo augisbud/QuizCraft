@@ -3,7 +3,7 @@ using QuizCraft.Domain.API.Constants;
 
 namespace QuizCraft.Domain.API.Entities;
 
-public class Quiz
+public class Quiz : IEntity
 {
     [Key, Required]
     public Guid Id { get; set; } = Guid.NewGuid();

@@ -10,11 +10,11 @@ namespace QuizCraft.Domain.API.Controllers;
 public class StatisticsController(IStatisticsService service) : ControllerBase
 {
     [HttpGet("/statistics/individual/quizzes/{id}")]
-    public ActionResult<QuizAttemptsDto> GetQuizAttemptsForUser(Guid id)
+    public async Task<ActionResult<QuizAttemptsDto>> GetQuizAttemptsForUser(Guid id)
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        var result = service.QuizAttemptsForUser(token, id);
+        var result = await service.QuizAttemptsForUser(token, id);
 
         return Ok(result);
     }
