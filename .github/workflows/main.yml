@@ -35,8 +35,9 @@ jobs:
 
       - name: Test
         run: |
-          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-build --verbosity normal
-          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-build --verbosity normal
+          rm -rf ./QuizCraft.Domain.API/Migrations
+          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov.info
+          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov.info
 
       - name: Publish
         run: |
