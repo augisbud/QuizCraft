@@ -5,7 +5,7 @@ using Moq;
 using Moq.Protected;
 using QuizCraft.Domain.API.APIClients;
 
-namespace QuizCraft.Domain.API.Tests.Unit;
+namespace QuizCraft.Domain.API.Tests.Unit.APIClientsTests;
 
 public class GeminiAPIClientTests
 {
@@ -37,35 +37,21 @@ public class GeminiAPIClientTests
     {
         // Arrange
         var prompt = "Test prompt";
-        var expectedOutput = new Output
-        {
-            Candidates =
+        var expectedOutput = new Output(
             [
-                new Candidate
-                {
-                    Content = new Content
-                    {
-                        Parts =
+                new Candidate(
+                    new Content(
                         [
-                            new Part { Text = "Response text" }
+                            new Part("Response text")
                         ],
-                        Role = null
-                    },
-                    FinishReason = "complete",
-                    Index = 0,
-                    SafetyRatings =
-                    [
-                        new SafetyRating { Category = "safe", Probability = "high" }
-                    ]
-                }
+                        null
+                    ),
+                    "complete",
+                    0
+                )
             ],
-            UsageMetadata = new UsageMetadata
-            {
-                PromptTokenCount = 1,
-                CandidatesTokenCount = 1,
-                TotalTokenCount = 2
-            }
-        };
+            new UsageMetadata(1, 1, 2)
+        );
 
         var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
         {
