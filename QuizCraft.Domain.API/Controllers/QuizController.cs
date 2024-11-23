@@ -32,11 +32,11 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpGet("/quizzes/{id}/questions")]
-    public ActionResult<DetailedQuizDto> GetDetailedQuizDto(Guid id)
+    public async Task<ActionResult<DetailedQuizDto>> GetDetailedQuizDto(Guid id)
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        var result = quizService.RetrieveQuestions(id, token);
+        var result = await quizService.RetrieveQuestions(id, token);
 
         return Ok(result);
     }
@@ -55,22 +55,22 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
 
     [Authorize]
     [HttpPost("/quizzes/{quizId}")]
-    public ActionResult CompleteQuizAttempt(Guid quizId)
+    public async Task<ActionResult> CompleteQuizAttempt(Guid quizId)
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        quizService.CompleteQuizAttempt(token, quizId);
+        await quizService.CompleteQuizAttempt(token, quizId);
 
         return Ok();
     }
 
     [Authorize]
     [HttpDelete("/quizzes/{quizId}")]
-    public ActionResult DeleteQuiz(Guid quizId)
+    public async Task<ActionResult> DeleteQuiz(Guid quizId)
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        quizService.DeleteQuiz(token, quizId);
+        await quizService.DeleteQuiz(token, quizId);
 
         return Ok();
     }

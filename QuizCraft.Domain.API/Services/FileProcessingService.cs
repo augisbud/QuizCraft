@@ -1,4 +1,5 @@
 using System.Text;
+using System.Collections.Concurrent;
 using Xceed.Words.NET;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas.Parser;
@@ -33,10 +34,16 @@ public class FileProcessingService : IFileProcessingService
     {
         using var document = DocX.Load(ProcessStream(file));
 
-        var text = document.Paragraphs
-            .Select(paragraph => paragraph.Text)
-            .Aggregate(new StringBuilder(), (sb, paragraphText) => sb.AppendLine(paragraphText))
-            .ToString();
+        var paragraphs = document.Paragraphs;
+        var paragraphTexts = new ConcurrentDictionary<int, string>();
+
+        Parallel.For(0, paragraphs.Count, i =>
+        {
+            paragraphTexts[i] = paragraphs[i].Text;
+        });
+
+        var orderedTexts = paragraphTexts.OrderBy(kv => kv.Key).Select(kv => kv.Value);
+        var text = string.Join(Environment.NewLine, orderedTexts);
 
         return await Task.FromResult(text);
     }
@@ -46,10 +53,17 @@ public class FileProcessingService : IFileProcessingService
         using var pdfReader = new PdfReader(ProcessStream(file));
         using var pdfDocument = new PdfDocument(pdfReader);
 
-        var text = Enumerable.Range(1, pdfDocument.GetNumberOfPages())
-            .Select(i => PdfTextExtractor.GetTextFromPage(pdfDocument.GetPage(i)))
-            .Aggregate(new StringBuilder(), (sb, pageText) => sb.Append(pageText))
-            .ToString();
+        int pageCount = pdfDocument.GetNumberOfPages();
+        var pageTexts = new ConcurrentDictionary<int, string>();
+
+        Parallel.For(1, pageCount + 1, i =>
+        {
+            var pageText = PdfTextExtractor.GetTextFromPage(pdfDocument.GetPage(i));
+            pageTexts[i] = pageText;
+        });
+
+        var orderedTexts = pageTexts.OrderBy(kv => kv.Key).Select(kv => kv.Value);
+        var text = string.Concat(orderedTexts);
 
         return await Task.FromResult(text);
     }

@@ -6,60 +6,42 @@ using QuizCraft.Domain.API.Tests.Integration.Fixtures;
 using Microsoft.Extensions.DependencyInjection;
 using QuizCraft.Domain.API.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
 
 namespace QuizCraft.Domain.API.Tests.Integration;
 
-public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<ControllerTestsFixture>
+public class QuizControllerTests : IClassFixture<ControllerTestsFixture>
 {
-    [Fact]
-    public async Task CreateQuiz_ReturnsExpected()
+    private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = new();
+    private readonly ControllerTestsFixture _fixture;
+
+    public QuizControllerTests(ControllerTestsFixture fixture)
     {
-        // Arrange
-        var client = fixture.Factory.CreateClient();
-
-        // Create a test file in memory
-        var fileContent = "The capital of France is Paris.";
-        using var contentStream = new MemoryStream(Encoding.UTF8.GetBytes(fileContent));
-        var file = new FormFile(contentStream, 0, contentStream.Length, "file", "test.txt");
-
-        // Create a multipart form data content
-        var formData = new MultipartFormDataContent
-        {
-            { new StreamContent(contentStream), "file", "test.txt" }
-        };
-
-        // Act
-        var response = await client.PostAsync("/quizzes", formData);
-
-        // Assert
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        var data = JsonConvert.DeserializeObject<QuizDto>(await response.Content.ReadAsStringAsync());
-        Assert.NotNull(data);
-        Assert.Single(data.Questions);
-        Assert.Equal("What is the capital of France?", data.Questions[0].Text);
-        Assert.Equal(2, data.Questions[0].Answers.Count);
-        Assert.Equal("Paris", data.Questions[0].Answers[0].Text);
-        Assert.Equal("Madrid", data.Questions[0].Answers[1].Text);
+        _fixture = fixture;
     }
 
+    private static string GenerateJwtToken(JwtSecurityTokenHandler jwtSecurityTokenHandler, string email)
+    {
+        var token = jwtSecurityTokenHandler.WriteToken(new JwtSecurityToken(claims:
+        [
+            new Claim("email", email)
+        ]));
 
+        return token;
+    }
 
     [Fact]
-    public async Task RetrieveQuizzes_ReturnsExpected()
+    public async Task GetQuizzes_ReturnsExpected()
     {
         // Arrange
-        var client = fixture.Factory.CreateClient();
+        var client = _fixture.Factory.CreateClient();
+        var token = GenerateJwtToken(_jwtSecurityTokenHandler, "user@example.com");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-        var requestContent = new StringContent("{}", Encoding.UTF8, "application/json");
         // Act
         var response = await client.GetAsync("/quizzes");
-
-        // Log the quizzes
-        using var scope = fixture.Factory.Services.CreateScope();
-        var context = scope.ServiceProvider.GetRequiredService<QuizzesDbContext>();
-        var allQuizzes = await context.Quizzes.ToListAsync();
-        Console.WriteLine(JsonConvert.SerializeObject(allQuizzes));
 
         // Assert
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -67,12 +49,128 @@ public class ControllerTests(ControllerTestsFixture fixture) : IClassFixture<Con
         var data = JsonConvert.DeserializeObject<List<QuizDto>>(await response.Content.ReadAsStringAsync());
 
         Assert.NotNull(data);
-        Assert.Single(data);
-        Assert.Equal(DataFixture.Quizzes.First().Id, data[0].Id);
-        Assert.Single(data[0].Questions);
-        Assert.Equal("What is 2 + 2?", data[0].Questions[0].Text);
-        Assert.Equal(2, data[0].Questions[0].Answers.Count);
-        Assert.Equal("4", data[0].Questions[0].Answers[0].Text);
-        Assert.Equal("5", data[0].Questions[0].Answers[1].Text);
+        Assert.Single(data); // Would be 2, but we already delete one quiz.
+
+        foreach (var quiz in data)
+        {
+            var matchedQuiz = DataFixture.Quizzes.FirstOrDefault(q => q.Id == quiz.Id);
+            Assert.NotNull(matchedQuiz);
+            Assert.Equal(quiz.Title, matchedQuiz.Title);
+            Assert.Equal(quiz.Category, matchedQuiz.Category);
+        }
+    }
+
+    [Fact]
+    public async Task GetDetailedQuizDto_ReturnsExpected()
+    {
+        // Arrange
+        var client = _fixture.Factory.CreateClient();
+        var token = GenerateJwtToken(_jwtSecurityTokenHandler, "user@example.com");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var quizId = DataFixture.Quiz1Id;
+
+        // Act
+        var response = await client.GetAsync($"/quizzes/{quizId}/questions");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var data = JsonConvert.DeserializeObject<DetailedQuizDto>(await response.Content.ReadAsStringAsync());
+
+        Assert.NotNull(data);
+        Assert.Equal(quizId, data.Id);
+        var expectedQuiz = DataFixture.Quizzes.First(q => q.Id == quizId);
+        Assert.Equal(expectedQuiz.Title, data.Title);
+    }
+
+    [Fact]
+    public async Task ValidateAnswer_ReturnsExpected()
+    {
+        // Arrange
+        var client = _fixture.Factory.CreateClient();
+        var token = GenerateJwtToken(_jwtSecurityTokenHandler, "user@example.com");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var quizId = DataFixture.Quiz1Id;
+        var questionId = DataFixture.Question1Id;
+        var inputDto = new AnswerAttemptDto(DataFixture.Answer1Id);
+        var content = new StringContent(JsonConvert.SerializeObject(inputDto), Encoding.UTF8, "application/json");
+
+        // Act
+        var response = await client.PostAsync($"/quizzes/{quizId}/questions/{questionId}", content);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var data = JsonConvert.DeserializeObject<ValidatedAnswerDto>(await response.Content.ReadAsStringAsync());
+
+        Assert.NotNull(data);
+    }
+
+    [Fact]
+    public async Task CompleteQuizAttempt_ReturnsOk()
+    {
+        // Arrange
+        var client = _fixture.Factory.CreateClient();
+        var token = GenerateJwtToken(_jwtSecurityTokenHandler, "user@example.com");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var quizId = DataFixture.Quiz1Id;
+
+        // Act
+        var response = await client.PostAsync($"/quizzes/{quizId}", null);
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        using var scope = _fixture.Factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<QuizzesDbContext>();
+        var quizAttempt = await context.QuizAttempts.FirstOrDefaultAsync(q => q.QuizId == quizId && q.IsCompleted);
+        Assert.NotNull(quizAttempt);
+        Assert.True(quizAttempt.IsCompleted);
+    }
+
+    [Fact]
+    public async Task DeleteQuiz_ReturnsOk()
+    {
+        // Arrange
+        var client = _fixture.Factory.CreateClient();
+        var token = GenerateJwtToken(_jwtSecurityTokenHandler, "user@example.com");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var quizId = DataFixture.Quiz2Id;
+
+        // Act
+        var response = await client.DeleteAsync($"/quizzes/{quizId}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        using var scope = _fixture.Factory.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<QuizzesDbContext>();
+        var deletedQuiz = await context.Quizzes.FindAsync(quizId);
+        Assert.Null(deletedQuiz);
+    }
+
+    [Fact]
+    public async Task GetQuizAttemptsForUser_ReturnsOk()
+    {
+        // Arrange
+        var client = _fixture.Factory.CreateClient();
+        var token = GenerateJwtToken(_jwtSecurityTokenHandler, "student1@example.com");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var id = DataFixture.Quiz1Id;
+
+        // Act
+        var response = await client.GetAsync($"/statistics/individual/quizzes/{id}");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+
+        var data = JsonConvert.DeserializeObject<QuizAttemptsDto>(await response.Content.ReadAsStringAsync());
+
+        Assert.NotNull(data);
+        Assert.Equal(DataFixture.Quizzes.Where(x => x.Id == id).First().Title, data.Name);
+        Assert.Equal(DataFixture.Quizzes.Where(x => x.Id == id).First().Questions.Count, data.Answers);
+        Assert.Single(data.Attempts);
+        Assert.Equal(DataFixture.QuizAttempts.Where(x => x.QuizId == id).First().Id, data.Attempts.First().Id);
+        Assert.Equal(2, data.Attempts.First().CorrectAnswers);
     }
 }

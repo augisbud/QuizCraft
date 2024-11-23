@@ -10,6 +10,7 @@ using QuizCraft.Domain.API.Filters;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -68,6 +69,8 @@ builder.Services.AddDbContext<QuizzesDbContext>(options =>
 });
 
 builder.Services.AddScoped<IQuizRepository, QuizRepository>();
+builder.Services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
+builder.Services.AddScoped<IQuizAnswerAttemptRepository, QuizAnswerAttemptRepository>();
 
 builder.Services.AddHttpClient<IGeminiAPIClient, GeminiAPIClient>(
     client =>
@@ -84,6 +87,14 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Warning()
+    .WriteTo.Console()
+    .WriteTo.File("logs/app.log", rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 var app = builder.Build();
 
