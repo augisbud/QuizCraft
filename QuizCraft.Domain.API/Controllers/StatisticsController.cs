@@ -15,7 +15,7 @@ public class StatisticsController(IStatisticsService service) : ControllerBase
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
-        var result = service.QuizAttemptsForUser(token, id);
+        var result = await service.QuizAttemptsForUser(token, id);
 
         return Ok(result);
     }

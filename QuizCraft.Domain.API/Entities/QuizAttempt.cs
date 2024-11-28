@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace QuizCraft.Domain.API.Entities;
 
-public class QuizAttempt
+public class QuizAttempt : IEntity
 {
     [Key, Required]
     public Guid Id { get; set; } = Guid.NewGuid();

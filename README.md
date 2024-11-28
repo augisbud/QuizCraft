@@ -46,6 +46,12 @@ docker build -t quicraft:latest .
 docker run -p 8080:8080 quizcraft:latest
 ```
 
+### Testing with Coverage
+```
+dotnet test /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov.info
+```
+Should work for Coverage Gutters in VS Code.
+
 ### Project Structure
 
 **Main components**

@@ -8,17 +8,17 @@ using System.Collections.Concurrent;
 
 namespace QuizCraft.Domain.API.Services;
 
-public class StatisticsService(IQuizRepository repository, JwtSecurityTokenHandler jwtSecurityTokenHandler, IMapper mapper) : IStatisticsService
+public class StatisticsService(IQuizRepository quizRepository, IQuizAttemptRepository quizAttemptRepository, JwtSecurityTokenHandler jwtSecurityTokenHandler, IMapper mapper) : IStatisticsService
 {
-    public QuizAttemptsDto QuizAttemptsForUser(string token, Guid quizId)
+    public async Task<QuizAttemptsDto> QuizAttemptsForUser(string token, Guid quizId)
     {
-        var quiz = repository.RetrieveQuizById(quizId) ?? throw new QuizNotFoundException(quizId);
-        var data = repository.RetrieveQuizAttempts(quizId, token.RetrieveEmail(jwtSecurityTokenHandler));
+        var quiz = await quizRepository.RetrieveByIdAsync(quizId, e => e.Questions) ?? throw new QuizNotFoundException(quizId);
+        var data = quizAttemptRepository.RetrieveQuizAttempts(quizId, token.RetrieveEmail(jwtSecurityTokenHandler));
 
         return new()
         {
             Name = quiz.Title,
-            Answers = quiz.Questions.SelectMany(x => x.Answers).Count(),
+            Answers = quiz.Questions.Count,
             Attempts = mapper.Map<List<QuizAttemptDto>>(data)
         };
     }

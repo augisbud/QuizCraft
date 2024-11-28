@@ -24,22 +24,20 @@ jobs:
       - name: Restore dependencies
         run: |
           dotnet restore ./QuizCraft.Domain.API
-
-        # dotnet restore ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit
-        # dotnet restore ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration
+          dotnet restore ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit
+          dotnet restore ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration
 
       - name: Build
         run: |
           dotnet build ./QuizCraft.Domain.API --configuration Release --no-restore
+          dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-restore
+          dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-restore
 
-      # dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-restore
-      # dotnet build ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-restore
-
-      # Disabling Tests for now
-      # - name: Test
-      #   run: |
-      #     dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-build --verbosity normal
-      #     dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-build --verbosity normal
+      - name: Test
+        run: |
+          rm -rf ./QuizCraft.Domain.API/Migrations
+          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Unit --configuration Release --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov.info
+          dotnet test ./QuizCraft.Domain.API.Tests/QuizCraft.Domain.API.Tests.Integration --configuration Release --no-build --verbosity normal /p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=./lcov.info
 
       - name: Publish
         run: |

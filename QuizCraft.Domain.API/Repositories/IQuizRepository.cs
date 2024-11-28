@@ -1,24 +1,11 @@
-using QuizCraft.Domain.API.Entities;
 using QuizCraft.Domain.API.Models;
+using QuizCraft.Domain.API.Entities;
 
 namespace QuizCraft.Domain.API.Repositories;
 
-public interface IQuizRepository
+public interface IQuizRepository : IBaseRepository<Quiz>
 {
-    Task<Quiz> CreateQuizAsync(Quiz quiz);
-    Quiz? RetrieveQuizById(Guid id);
     Quiz? RetrieveQuizWithQuestionsById(Guid id);
     IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId);
     AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId);
-    IEnumerable<QuizForTransferDto> RetrieveQuizzes();
-    QuizAttempt? RetrieveQuizAttempt(Guid quizId, string email);
-    IEnumerable<QuizAttempt> RetrieveQuizAttempts(Guid quizId, string email);
-    QuizAttempt CreateQuizAttempt(Guid quizId, string email);
-    IEnumerable<QuizAnswerAttempt> RetrieveQuizAnswerAttempt(Guid attemptId);
-    QuizAnswerAttempt CreateQuizAnswerAttempt(Guid attemptId, Guid questionId, Guid answerId);
-    void DeleteQuiz(Quiz quiz);
-    bool SaveChanges();
-    Task<int> GetTotalUsersAsync();
-    Task<int> GetTotalQuizzesCreatedAsync();
-    Task<double> GetAverageQuizzesTakenPerUserAsync();
 }

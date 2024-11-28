@@ -18,52 +18,6 @@ public class ControllerTestsFixture
     {
         WireMockServer = WireMockServer.Start(8080);
 
-        WireMockServer
-            .Given(Request.Create().WithPath("/geminiAPI").UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBodyAsJson(
-            new Output
-            {
-                Candidates =
-                [
-                    new Candidate
-                    {
-                        Content = new Content
-                        {
-                            Parts =
-                            [
-                                new Part { Text = JsonSerializer.Serialize(new List<QuestionDto>
-                                {
-                                    new QuestionDto
-                                    {
-                                        Text = "What is the capital of France?",
-                                        Answers = new List<AnswerDto>
-                                        {
-                                            new AnswerDto("Paris", true),
-                                            new AnswerDto("Madrid", false)
-                                        }
-                                    }
-                                }) }
-                            ],
-                            Role = "prompt"
-                        },
-                        FinishReason = "complete",
-                        Index = 0,
-                        SafetyRatings =
-                        [
-                            new SafetyRating { Category = "safe", Probability = "high" }
-                        ]
-                    }
-                ],
-                UsageMetadata = new UsageMetadata
-                {
-                    PromptTokenCount = 1,
-                    CandidatesTokenCount = 1,
-                    TotalTokenCount = 2
-                }
-            }
-    ));
-
-
         Factory = new CustomWebApplicationFactory();
 
         using var scope = Factory.Services.CreateScope();
@@ -73,6 +27,8 @@ public class ControllerTestsFixture
 
         context.Database.EnsureCreated();
         context.Quizzes.AddRange(DataFixture.Quizzes);
+        context.QuizAttempts.AddRange(DataFixture.QuizAttempts);
+
         context.SaveChanges();
     }
 }
