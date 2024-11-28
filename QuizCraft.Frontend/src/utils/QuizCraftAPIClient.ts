@@ -336,7 +336,7 @@ export class Client {
     /**
      * @return Success
      */
-    global(): Promise<StatisticDto[]> {
+    global(): Promise<GlobalStatsDto> {
         let url_ = this.baseUrl + "/statistics/global";
         url_ = url_.replace(/[?&]$/, "");
 
@@ -352,21 +352,14 @@ export class Client {
         });
     }
 
-    protected processGlobal(response: Response): Promise<StatisticDto[]> {
+    protected processGlobal(response: Response): Promise<GlobalStatsDto> {
         const status = response.status;
         let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
         if (status === 200) {
             return response.text().then((_responseText) => {
                 let result200: any = null;
                 let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
-                if (Array.isArray(resultData200)) {
-                    result200 = [] as any;
-                    for (let item of resultData200)
-                        result200!.push(StatisticDto.fromJS(item));
-                }
-                else {
-                    result200 = <any>null;
-                }
+                result200 = GlobalStatsDto.fromJS(resultData200);
                 return result200;
             });
         } else if (status !== 200 && status !== 204) {
@@ -374,7 +367,7 @@ export class Client {
                 return throwException("An unexpected server error occurred.", status, _responseText, _headers);
             });
         }
-        return Promise.resolve<StatisticDto[]>(null as any);
+        return Promise.resolve<GlobalStatsDto>(null as any);
     }
 }
 
@@ -534,6 +527,50 @@ export interface IDetailedQuizDto {
     title: string;
     currentQuestionId: string;
     questions: QuestionDto[];
+}
+
+export class GlobalStatsDto implements IGlobalStatsDto {
+    totalUsers?: number;
+    totalQuizzesCreated?: number;
+    averageQuizzesPerUser?: number;
+
+    constructor(data?: IGlobalStatsDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.totalUsers = _data["totalUsers"];
+            this.totalQuizzesCreated = _data["totalQuizzesCreated"];
+            this.averageQuizzesPerUser = _data["averageQuizzesPerUser"];
+        }
+    }
+
+    static fromJS(data: any): GlobalStatsDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new GlobalStatsDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["totalUsers"] = this.totalUsers;
+        data["totalQuizzesCreated"] = this.totalQuizzesCreated;
+        data["averageQuizzesPerUser"] = this.averageQuizzesPerUser;
+        return data;
+    }
+}
+
+export interface IGlobalStatsDto {
+    totalUsers?: number;
+    totalQuizzesCreated?: number;
+    averageQuizzesPerUser?: number;
 }
 
 export class QuestionDto implements IQuestionDto {
@@ -756,46 +793,6 @@ export interface IQuizDto {
     averageScore: number;
     highScore: number;
     isOwner: boolean;
-}
-
-export class StatisticDto implements IStatisticDto {
-    label?: string | undefined;
-    value?: string | undefined;
-
-    constructor(data?: IStatisticDto) {
-        if (data) {
-            for (var property in data) {
-                if (data.hasOwnProperty(property))
-                    (<any>this)[property] = (<any>data)[property];
-            }
-        }
-    }
-
-    init(_data?: any) {
-        if (_data) {
-            this.label = _data["label"];
-            this.value = _data["value"];
-        }
-    }
-
-    static fromJS(data: any): StatisticDto {
-        data = typeof data === 'object' ? data : {};
-        let result = new StatisticDto();
-        result.init(data);
-        return result;
-    }
-
-    toJSON(data?: any) {
-        data = typeof data === 'object' ? data : {};
-        data["label"] = this.label;
-        data["value"] = this.value;
-        return data;
-    }
-}
-
-export interface IStatisticDto {
-    label?: string | undefined;
-    value?: string | undefined;
 }
 
 export class ValidatedAnswerDto implements IValidatedAnswerDto {
