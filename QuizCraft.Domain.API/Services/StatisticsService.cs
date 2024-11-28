@@ -30,30 +30,18 @@ public class StatisticsService(IQuizRepository quizRepository, IQuizAttemptRepos
         return jwtToken.Claims.First(c => c.Type == "email").Value;
     }
 
-    public async Task<IEnumerable<StatisticDto>> GetGlobalStatisticsAsync()
+    public async Task<GlobalStatsDto> GlobalStatisticsAsync()
     {
-        var totalUsers = await repository.GetTotalUsersAsync();
-        var totalQuizzes = await repository.GetTotalQuizzesCreatedAsync();
-        var averageQuizzes = await repository.GetAverageQuizzesTakenPerUserAsync();
+        var totalUsers = await quizRepository.GetTotalUsersAsync();
+        var totalQuizzes = await quizRepository.GetTotalQuizzesCreatedAsync();
+        var averageQuizzes = await quizRepository.GetAverageQuizzesTakenPerUserAsync();
 
-        var statistics = new ConcurrentBag<StatisticDto>
+        return new GlobalStatsDto
         {
-            new StatisticDto
-            {
-                Label = "Total Users",
-                Value = totalUsers.ToString()
-            },
-            new StatisticDto
-            {
-                Label = "Total Quizzes Created",
-                Value = totalQuizzes.ToString()
-            },
-            new StatisticDto
-            {
-                Label = "Average Quizzes Per User",
-                Value = averageQuizzes.ToString("F2")
-            }
+            TotalUsers = totalUsers,
+            TotalQuizzesCreated = totalQuizzes,
+            AverageQuizzesPerUser = averageQuizzes
         };
-        return statistics;
     }
+
 }

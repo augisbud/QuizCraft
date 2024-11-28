@@ -11,7 +11,7 @@ public class StatisticsController(IStatisticsService service) : ControllerBase
 {
     [Authorize]
     [HttpGet("individual/quizzes/{id}")]
-    public ActionResult<QuizAttemptsDto> GetQuizAttemptsForUser(Guid id)
+    public async Task<ActionResult<QuizAttemptsDto>> GetQuizAttemptsForUser(Guid id)
     {
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
@@ -21,24 +21,9 @@ public class StatisticsController(IStatisticsService service) : ControllerBase
     }
 
     [HttpGet("global")]
-    public async Task<ActionResult<IEnumerable<StatisticDto>>> GetGlobalStatistics()
+    public async Task<GlobalStatsDto> GetGlobalStatisticsAsync()
     {
-        try
-        {
-            var stats = await service.GetGlobalStatisticsAsync();
-
-            if (stats == null)
-            {
-                return StatusCode(500, "Failed to retrieve global statistics.");
-            }
-
-            return Ok(stats);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex);
-            return StatusCode(500, "An unexpected error occurred.");
-        }
+        return await service.GlobalStatisticsAsync();
     }
 }
 
