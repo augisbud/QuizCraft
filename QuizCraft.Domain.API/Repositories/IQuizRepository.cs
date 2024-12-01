@@ -5,6 +5,7 @@ namespace QuizCraft.Domain.API.Repositories;
 
 public interface IQuizRepository : IBaseRepository<Quiz>
 {
+    Task<string> GetQuizNameByIdAsync(Guid quizId);
     Quiz? RetrieveQuizWithQuestionsById(Guid id);
     IEnumerable<QuestionDto> RetrieveQuestions(Guid quizId);
     AnswerDto? RetrieveAnswer(Guid quizId, Guid questionId);

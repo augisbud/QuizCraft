@@ -14,6 +14,11 @@ namespace QuizCraft.Domain.API.Services;
 
 public class QuizService(IGeminiAPIClient geminiAPIClient, IMapper mapper, IQuizRepository quizRepository, IQuizAttemptRepository quizAttemptRepository, IQuizAnswerAttemptRepository quizAnswerAttemptRepository, JwtSecurityTokenHandler jwtSecurityTokenHandler) : IQuizService
 {
+    public async Task<string> GetQuizNameByIdAsync(Guid quizId)
+    {
+        return await quizRepository.GetQuizNameByIdAsync(quizId);
+    }
+
     public async Task<Guid> CreateQuizAsync(string source, string token)
     {
         var response = await geminiAPIClient.PostAsync(GeminiAPITemplates.GeneratePrompt(source));

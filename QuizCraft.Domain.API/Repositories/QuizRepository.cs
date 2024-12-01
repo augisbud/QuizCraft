@@ -11,6 +11,13 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : BaseRepo
 {
     private readonly IMapper _mapper = mapper;
 
+    public async Task<string> GetQuizNameByIdAsync(Guid quizId)
+    {
+        var quiz = await context.Quizzes.FirstOrDefaultAsync(q => q.Id == quizId);
+
+        return quiz?.Title ?? $"quiz_{quizId}";
+    }
+
     public Quiz? RetrieveQuizWithQuestionsById(Guid id)
     {
         return _dbSet

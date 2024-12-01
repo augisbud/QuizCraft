@@ -4,6 +4,7 @@ namespace QuizCraft.Domain.API.Services;
 
 public interface IQuizService
 {
+    Task<string> GetQuizNameByIdAsync(Guid quizId);
     Task<Guid> CreateQuizAsync(string source, string token);
     IEnumerable<QuizDto> RetrieveQuizzes(string? token);
     Task<DetailedQuizDto> RetrieveQuestions(Guid quizId, string token);
