@@ -1,10 +1,11 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Navbar } from "../../components/Navbar/Navbar";
-import { Button, styled, CircularProgress } from "@mui/material";
+import { Button, styled } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import styles from "./CreateQuiz.module.scss";
 import { useNavigate } from "react-router-dom";
 import { BackendUri } from "../../utils/Environment";
+import { LoadingScreen } from "../../components/LoadingScreen/LoadingScreen"
 
 export const CreateQuiz = () => {
   const navigate = useNavigate();
@@ -76,31 +77,28 @@ export const CreateQuiz = () => {
     width: 1,
   });
 
-  return (
-    <>
-      <Navbar />
-      <div className={styles.mainContainer}>
-        <div className={styles.quizUploaderContainer}>
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <div className={styles.uploadSection}>
-              <h3>Upload File</h3>
-              <Button
-                component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
-                startIcon={<CloudUpload />}
-              >
-                Upload Quiz
-                <VisuallyHiddenInput type="file" onChange={handleFileChange} />
-              </Button>
-              {file && <p>Selected File: {file.name}</p>}
+    return (
+        <>
+            <Navbar />
+            <div className={styles.mainContainer}>
+                {loading && <LoadingScreen />}
+                <div className={styles.quizUploaderContainer}>
+                    <div className={styles.uploadSection}>
+                        <h3>Upload File</h3>
+                        <Button
+                            component="label"
+                            role={undefined}
+                            variant="contained"
+                            tabIndex={-1}
+                            startIcon={<CloudUpload />}
+                        >
+                            Upload File
+                            <VisuallyHiddenInput type="file" onChange={handleFileChange} />
+                        </Button>
+                        {file && <p>Selected File: {file.name}</p>}
+                    </div>
+                </div>
             </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
+        </>
+    );
 };
