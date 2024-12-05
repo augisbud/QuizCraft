@@ -36,25 +36,4 @@ public class QuizRepository(QuizzesDbContext context, IMapper mapper) : BaseRepo
             .ProjectTo<AnswerDto>(_mapper.ConfigurationProvider)
             .FirstOrDefault();
     }
-
-    public async Task<int> GetTotalUsersAsync()
-    {
-        return await context.QuizAttempts
-            .Select(q => q.UserEmail)
-            .Distinct()
-            .CountAsync();
-    }
-
-    public async Task<int> GetTotalQuizzesCreatedAsync()
-    {
-        return await context.Quizzes.CountAsync();
-    }
-
-    public async Task<double> GetAverageQuizzesTakenPerUserAsync()
-    {
-        var totalUsers = await GetTotalUsersAsync();
-        var totalAttempts = await context.QuizAttempts.CountAsync();
-
-        return totalUsers == 0 ? 0 : (double)totalAttempts / totalUsers;
-    }
 }

@@ -14,7 +14,8 @@ export interface QuizDto {
     nextUnansweredQuestionIndex: number;
 }
 
-export interface StatisticDto {
-    label: string;
-    value: string;
+export interface GlobalStatsDto {
+    totalUsers: number;
+    totalQuizzesCreated: number;
+    averageQuizzesPerUser: number;
 }

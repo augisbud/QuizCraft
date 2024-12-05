@@ -28,9 +28,9 @@ public class BaseRepository<T> where T : class, IEntity
         return result.Entity;
     }
 
-    public IEnumerable<T> RetrieveAll()
+    public async Task<IEnumerable<T>> RetrieveAllAsync()
     {
-        return _dbSet.AsNoTracking();
+        return await _dbSet.AsNoTracking().ToListAsync();
     }
 
     public async Task<T?> RetrieveByIdAsync(Guid id, params Expression<Func<T, object>>[] includes)

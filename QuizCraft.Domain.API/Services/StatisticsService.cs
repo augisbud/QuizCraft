@@ -32,16 +32,24 @@ public class StatisticsService(IQuizRepository quizRepository, IQuizAttemptRepos
 
     public async Task<GlobalStatsDto> GlobalStatisticsAsync()
     {
-        var totalUsers = await quizRepository.GetTotalUsersAsync();
-        var totalQuizzes = await quizRepository.GetTotalQuizzesCreatedAsync();
-        var averageQuizzes = await quizRepository.GetAverageQuizzesTakenPerUserAsync();
+        var userEmailsQuery = (await quizAttemptRepository.RetrieveAllAsync())
+            .Select(attempt => attempt.UserEmail)
+            .Distinct();
+
+        var totalQuizzesQuery = await quizRepository.RetrieveAllAsync();
+        var totalAttemptsQuery = await quizAttemptRepository.RetrieveAllAsync();
+
+        var totalUsers = userEmailsQuery.Count();
+        var totalQuizzes = totalQuizzesQuery.Count();
+        var totalAttempts = totalAttemptsQuery.Count();
+
+        var averageQuizzesPerUser = totalUsers == 0 ? 0 : (double)totalAttempts / totalUsers;
 
         return new GlobalStatsDto
         {
             TotalUsers = totalUsers,
             TotalQuizzesCreated = totalQuizzes,
-            AverageQuizzesPerUser = averageQuizzes
+            AverageQuizzesPerUser = averageQuizzesPerUser
         };
     }
-
 }
