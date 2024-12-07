@@ -85,7 +85,7 @@ public class BaseRepositoryTests : IDisposable
         _context.SaveChanges();
 
         // Act
-        var result = _repository.RetrieveAllAsync();
+        var result = await _repository.RetrieveAllAsync();
 
         // Assert
         Assert.Equal(2, result.Count());
@@ -134,11 +134,12 @@ public class BaseRepositoryTests : IDisposable
         _context.SaveChanges();
 
         // Act
-        var result = _repository.RetrieveByCondition(a => a.IsCompleted);
+        var result = await _repository.RetrieveByConditionAsync(a => a.IsCompleted);
 
         // Assert
         Assert.Single(result);
-        Assert.Contains(result, e => e.Id == completedAttempt.Id);
+        Assert.Contains(result.ToList(), e => e.Id == completedAttempt.Id);
+
     }
 
     [Fact]
@@ -201,7 +202,7 @@ public class BaseRepositoryTests : IDisposable
                 }
             };
         _context.QuizAttempts.AddRange(entities);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         // Act
         var result = _repository.RetrieveProjected<QuizAttempt, QuizAttemptDto>();
