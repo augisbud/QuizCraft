@@ -83,12 +83,7 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
 
         var pdfBytes = await pdfExportService.GenerateQuizPdfAsync(quizId, token);
-        var quizName = await quizService.GetQuizNameByIdAsync(quizId);
 
-        var encodedQuizName = Uri.EscapeDataString(quizName);
-        Response.Headers["Content-Disposition"] = $"attachment; filename=\"{encodedQuizName}.pdf\"";
-        Response.Headers["Content-Type"] = "application/pdf";
-
-        return File(pdfBytes, "application/pdf", $"{encodedQuizName}.pdf");
+        return File(pdfBytes, "application/pdf", $"quiz_{quizId}.pdf");
     }
 }

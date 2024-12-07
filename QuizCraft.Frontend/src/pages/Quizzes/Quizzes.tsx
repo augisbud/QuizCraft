@@ -22,22 +22,11 @@ export const Quizzes = () => {
         fetchQuizzes();
     }, []);
 
-
-    //TODO: make the file name the name of the quiz. It is passed in the controller through Content Disposition
     const handleDownload = async (quizId: string) => {
         try {
             const fileResponse = await client.exportPdf(quizId);
 
-            const contentDisposition = fileResponse.headers?.['content-disposition'] as string;
-            let filename = `quiz_${quizId}.pdf`;
-
-            if (contentDisposition) {
-                const matches = /filename\*?=(?:UTF-8'')?([^;]+)/.exec(contentDisposition);
-                if (matches && matches[1]) {
-                    filename = decodeURIComponent(matches[1]);
-                }
-            }
-
+            const filename = `quiz_${quizId}.pdf`;
             const fileBlob = fileResponse.data;
             const fileURL = URL.createObjectURL(fileBlob);
 
