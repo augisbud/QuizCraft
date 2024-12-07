@@ -11,6 +11,7 @@ public class QuizControllerTests
 {
     private readonly Mock<IQuizService> _quizService = new();
     private readonly Mock<IFileProcessingService> _fileProcessingService = new();
+    private readonly Mock<IPdfExportService> _pdfExportService = new();
     private readonly QuizController _controller;
 
     public QuizControllerTests()
