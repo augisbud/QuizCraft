@@ -118,7 +118,7 @@ public class BaseRepositoryTests : IDisposable
     }
 
     [Fact]
-    public async Task RetrieveByCondition_ReturnsFilteredEntities()
+    public void RetrieveByCondition_ReturnsFilteredEntities()
     {
         // Arrange
         var completedAttempt = new QuizAttempt
@@ -134,16 +134,15 @@ public class BaseRepositoryTests : IDisposable
             IsCompleted = false
         };
         _context.QuizAttempts.AddRange(completedAttempt, incompleteAttempt);
-        await _context.SaveChangesAsync();
+        _context.SaveChanges();
 
         // Act
-        var result = await _repository.RetrieveByConditionAsync(a => a.IsCompleted);
+        var result = _repository.RetrieveByCondition(a => a.IsCompleted);
 
         // Assert
         Assert.Single(result);
         Assert.Contains(result, e => e.Id == completedAttempt.Id);
     }
-
 
     [Fact]
     public void Delete_RemovesEntityAndSavesChanges()
