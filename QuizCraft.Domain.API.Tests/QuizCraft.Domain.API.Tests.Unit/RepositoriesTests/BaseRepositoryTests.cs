@@ -85,7 +85,7 @@ public class BaseRepositoryTests : IDisposable
         _context.SaveChanges();
 
         // Act
-        var result = _repository.RetrieveAll();
+        var result = _repository.RetrieveAllAsync();
 
         // Assert
         Assert.Equal(2, result.Count());
