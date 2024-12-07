@@ -16,7 +16,7 @@ public class QuizControllerTests
 
     public QuizControllerTests()
     {
-        _controller = new QuizController(_quizService.Object, _fileProcessingService.Object)
+        _controller = new QuizController(_quizService.Object, _fileProcessingService.Object, _pdfExportService.Object)
         {
             ControllerContext = new ControllerContext
             {
