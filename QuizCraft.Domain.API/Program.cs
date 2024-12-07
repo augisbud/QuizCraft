@@ -56,6 +56,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "QuizCraft API", Version = "v1" });
     c.OperationFilter<SwaggerFileUploadOperationFilter>();
+    c.OperationFilter<SwaggerPdfResponseOperationFilter>();
 });
 
 builder.Services.AddScoped<JwtSecurityTokenHandler>();
@@ -87,6 +88,8 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
+builder.Services.AddScoped<IPdfExportService, PdfExportService>();
+
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Warning()
