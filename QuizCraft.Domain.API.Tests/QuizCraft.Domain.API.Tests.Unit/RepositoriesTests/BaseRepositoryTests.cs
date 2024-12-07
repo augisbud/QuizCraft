@@ -65,24 +65,24 @@ public class BaseRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void RetrieveAll_ReturnsAllEntities()
+    public async Task RetrieveAll_ReturnsAllEntities()
     {
         // Arrange
         var entities = new List<QuizAttempt>
-            {
-                new() {
-                    QuizId = Guid.NewGuid(),
-                    UserEmail = "user1@example.com",
-                    IsCompleted = false
-                },
-                new() {
-                    QuizId = Guid.NewGuid(),
-                    UserEmail = "user2@example.com",
-                    IsCompleted = true
-                }
-            };
+        {
+            new() {
+                QuizId = Guid.NewGuid(),
+                UserEmail = "user1@example.com",
+                IsCompleted = false
+            },
+            new() {
+                QuizId = Guid.NewGuid(),
+                UserEmail = "user2@example.com",
+                IsCompleted = true
+            }
+        };
         _context.QuizAttempts.AddRange(entities);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         // Act
         var result = await _repository.RetrieveAllAsync();
@@ -115,7 +115,7 @@ public class BaseRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void RetrieveByCondition_ReturnsFilteredEntities()
+    public async Task RetrieveByCondition_ReturnsFilteredEntities()
     {
         // Arrange
         var completedAttempt = new QuizAttempt
@@ -131,15 +131,14 @@ public class BaseRepositoryTests : IDisposable
             IsCompleted = false
         };
         _context.QuizAttempts.AddRange(completedAttempt, incompleteAttempt);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         // Act
-        var result = await _repository.RetrieveByConditionAsync(a => a.IsCompleted);
+        var result = _repository.RetrieveByCondition(a => a.IsCompleted);
 
         // Assert
         Assert.Single(result);
         Assert.Contains(result.ToList(), e => e.Id == completedAttempt.Id);
-
     }
 
     [Fact]
