@@ -13,3 +13,9 @@ export interface QuizDto {
     questions: QuestionDto[];
     nextUnansweredQuestionIndex: number;
 }
+
+export interface GlobalStatsDto {
+    totalUsers: number;
+    totalQuizzesCreated: number;
+    averageQuizzesPerUser: number;
+}
