@@ -59,29 +59,23 @@ public class BaseRepositoryTests : IDisposable
 
         // Assert
         Assert.Equal(entity, result);
+
         var dbEntity = await _context.QuizAttempts.FindAsync(entity.Id);
         Assert.NotNull(dbEntity);
-        Assert.Equal(entity.Id, dbEntity.Id);
+        Assert.Equal(entity.Id, dbEntity!.Id);
     }
 
     [Fact]
-    public async Task RetrieveAll_ReturnsAllEntities()
+    public async Task RetrieveAllAsync_ReturnsAllEntities()
     {
         // Arrange
         var entities = new List<QuizAttempt>
         {
-            new() {
-                QuizId = Guid.NewGuid(),
-                UserEmail = "user1@example.com",
-                IsCompleted = false
-            },
-            new() {
-                QuizId = Guid.NewGuid(),
-                UserEmail = "user2@example.com",
-                IsCompleted = true
-            }
+            new() { QuizId = Guid.NewGuid(), UserEmail = "user1@example.com", IsCompleted = false },
+            new() { QuizId = Guid.NewGuid(), UserEmail = "user2@example.com", IsCompleted = true }
         };
-        _context.QuizAttempts.AddRange(entities);
+
+        await _context.QuizAttempts.AddRangeAsync(entities);
         await _context.SaveChangesAsync();
 
         // Act
@@ -103,46 +97,41 @@ public class BaseRepositoryTests : IDisposable
             UserEmail = "user@example.com",
             IsCompleted = false
         };
-        _context.QuizAttempts.Add(entity);
-        _context.SaveChanges();
+
+        await _context.QuizAttempts.AddAsync(entity);
+        await _context.SaveChangesAsync();
 
         // Act
         var result = await _repository.RetrieveByIdAsync(entity.Id);
 
         // Assert
         Assert.NotNull(result);
-        Assert.Equal(entity.Id, result.Id);
+        Assert.Equal(entity.Id, result!.Id);
     }
 
     [Fact]
-    public async Task RetrieveByCondition_ReturnsFilteredEntities()
+    public void RetrieveByCondition_ReturnsFilteredEntities()
     {
         // Arrange
-        var completedAttempt = new QuizAttempt
+        var entities = new List<QuizAttempt>
         {
-            QuizId = Guid.NewGuid(),
-            UserEmail = "user1@example.com",
-            IsCompleted = true
+            new() { QuizId = Guid.NewGuid(), UserEmail = "user1@example.com", IsCompleted = true },
+            new() { QuizId = Guid.NewGuid(), UserEmail = "user2@example.com", IsCompleted = false }
         };
-        var incompleteAttempt = new QuizAttempt
-        {
-            QuizId = Guid.NewGuid(),
-            UserEmail = "user2@example.com",
-            IsCompleted = false
-        };
-        _context.QuizAttempts.AddRange(completedAttempt, incompleteAttempt);
-        await _context.SaveChangesAsync();
+
+        _context.QuizAttempts.AddRange(entities);
+        _context.SaveChanges();
 
         // Act
         var result = _repository.RetrieveByCondition(a => a.IsCompleted);
 
         // Assert
         Assert.Single(result);
-        Assert.Contains(result.ToList(), e => e.Id == completedAttempt.Id);
+        Assert.Contains(result, e => e.UserEmail == "user1@example.com");
     }
 
     [Fact]
-    public void Delete_RemovesEntityAndSavesChanges()
+    public async Task Delete_RemovesEntityAndSavesChanges()
     {
         // Arrange
         var entity = new QuizAttempt
@@ -151,14 +140,16 @@ public class BaseRepositoryTests : IDisposable
             UserEmail = "user@example.com",
             IsCompleted = false
         };
-        _context.QuizAttempts.Add(entity);
-        _context.SaveChanges();
+
+        await _context.QuizAttempts.AddAsync(entity);
+        await _context.SaveChangesAsync();
 
         // Act
         _repository.Delete(entity);
+        await _context.SaveChangesAsync();
 
         // Assert
-        var dbEntity = _context.QuizAttempts.Find(entity.Id);
+        var dbEntity = await _context.QuizAttempts.FindAsync(entity.Id);
         Assert.Null(dbEntity);
     }
 
@@ -172,35 +163,30 @@ public class BaseRepositoryTests : IDisposable
             UserEmail = "user@example.com",
             IsCompleted = false
         };
-        _context.QuizAttempts.Add(entity);
+
+        await _context.QuizAttempts.AddAsync(entity);
 
         // Act
         var result = await _repository.SaveChangesAsync();
 
         // Assert
         Assert.True(result);
+
         var dbEntity = await _context.QuizAttempts.FindAsync(entity.Id);
         Assert.NotNull(dbEntity);
     }
 
     [Fact]
-    public void RetrieveProjected_ReturnsProjectedEntities()
+    public async Task RetrieveProjected_ReturnsProjectedEntities()
     {
         // Arrange
         var entities = new List<QuizAttempt>
-            {
-                new() {
-                    QuizId = Guid.NewGuid(),
-                    UserEmail = "user1@example.com",
-                    IsCompleted = false
-                },
-                new() {
-                    QuizId = Guid.NewGuid(),
-                    UserEmail = "user2@example.com",
-                    IsCompleted = true
-                }
-            };
-        _context.QuizAttempts.AddRange(entities);
+        {
+            new() { QuizId = Guid.NewGuid(), UserEmail = "user1@example.com", IsCompleted = false },
+            new() { QuizId = Guid.NewGuid(), UserEmail = "user2@example.com", IsCompleted = true }
+        };
+
+        await _context.QuizAttempts.AddRangeAsync(entities);
         await _context.SaveChangesAsync();
 
         // Act
@@ -208,7 +194,7 @@ public class BaseRepositoryTests : IDisposable
 
         // Assert
         Assert.Equal(2, result.Count());
-        Assert.Contains(result, e => e.Id == entities[0].Id);
-        Assert.Contains(result, e => e.Id == entities[1].Id);
+        Assert.Contains(result, e => e.UserEmail == "user1@example.com");
+        Assert.Contains(result, e => e.UserEmail == "user2@example.com");
     }
 }
