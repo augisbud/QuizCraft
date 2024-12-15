@@ -5,6 +5,7 @@ using iText.Layout.Properties;
 using iText.Kernel.Font;
 using System.IO;
 using System.Threading.Tasks;
+using QuizCraft.Domain.API.Exceptions;
 
 namespace QuizCraft.Domain.API.Services;
 
@@ -19,12 +20,8 @@ public class PdfExportService(IQuizService quizService) : IPdfExportService
         using var pdf = new PdfDocument(writer);
         var document = new Document(pdf);
 
-        var fontPath = "Services/ExportUtils/DejaVuSans.ttf";
-        var font = PdfFontFactory.CreateFont(fontPath, PdfFontFactory.EmbeddingStrategy.PREFER_EMBEDDED);
-
         document.Add(new Paragraph(quizDetails.Title)
             .SetTextAlignment(TextAlignment.CENTER)
-            .SetFont(font)
             .SetFontSize(18)
             .SetMarginBottom(20));
 
@@ -36,7 +33,6 @@ public class PdfExportService(IQuizService quizService) : IPdfExportService
                 .FirstOrDefault(x => x.q == question)?.index + 1 ?? 0;
 
             var questionText = new Paragraph($"{questionIndex}. {question.Text}")
-                .SetFont(font)
                 .SetFontSize(14)
                 .SetMarginBottom(10);
 
@@ -46,11 +42,9 @@ public class PdfExportService(IQuizService quizService) : IPdfExportService
             {
                 var answerParagraph = new Paragraph()
                     .Add(new Text("O  "))
-                    .SetFont(font)
                     .SetFontSize(12)
                     .SetMarginLeft(10)
                     .Add(new Text(answer.Text)
-                        .SetFont(font)
                         .SetFontSize(12))
                     .SetMultipliedLeading(0.8f);
 
