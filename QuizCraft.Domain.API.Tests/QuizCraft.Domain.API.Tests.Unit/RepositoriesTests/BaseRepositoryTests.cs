@@ -214,4 +214,34 @@ public class BaseRepositoryTests : IDisposable
         Assert.Contains(result, e => e.Id == entities[0].Id);
         Assert.Contains(result, e => e.Id == entities[1].Id);
     }
+
+    [Fact]
+    public async Task RetrieveByIdAsync_IncludesRelatedEntities()
+    {
+        // Arrange
+        var quizAttempt = new QuizAttempt
+        {
+            QuizId = Guid.NewGuid(),
+            UserEmail = "user@example.com",
+            IsCompleted = false
+        };
+        var quizAnswerAttempt = new QuizAnswerAttempt
+        {
+            QuestionId = Guid.NewGuid(),
+            QuizAttemptId = quizAttempt.Id,
+            AnswerId = Guid.NewGuid()
+        };
+        _context.QuizAttempts.Add(quizAttempt);
+        _context.QuizAnswerAttempts.Add(quizAnswerAttempt);
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _repository.RetrieveByIdAsync(quizAttempt.Id, q => q.QuizAnswerAttempts);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(quizAttempt.Id, result.Id);
+        Assert.NotNull(result.QuizAnswerAttempts);
+        Assert.Contains(result.QuizAnswerAttempts, a => a.Id == quizAnswerAttempt.Id);
+    }
 }
