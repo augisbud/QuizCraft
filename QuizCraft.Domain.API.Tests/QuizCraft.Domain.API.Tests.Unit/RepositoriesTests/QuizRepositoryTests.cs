@@ -151,4 +151,67 @@ public class QuizRepositoryTests : IDisposable
         Assert.NotNull(result);
         Assert.Equal("4", result.Text);
     }
+
+    [Fact]
+    public async Task GetTotalUsersAsync_ReturnsCorrectCount()
+    {
+        // Arrange
+        _context.QuizAttempts.AddRange(
+            new QuizAttempt { UserEmail = "user1@example.com", QuizId = Guid.NewGuid(), IsCompleted = true },
+            new QuizAttempt { UserEmail = "user2@example.com", QuizId = Guid.NewGuid(), IsCompleted = true },
+            new QuizAttempt { UserEmail = "user1@example.com", QuizId = Guid.NewGuid(), IsCompleted = true }
+        );
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _repository.GetTotalUsersAsync();
+
+        // Assert
+        Assert.Equal(2, result);
+    }
+
+    [Fact]
+    public async Task GetTotalQuizzesCreatedAsync_ReturnsCorrectCount()
+    {
+        // Arrange
+        _context.Quizzes.AddRange(
+            new Quiz { Id = Guid.NewGuid(), Category = Constants.Category.Art, Title = "Quiz 1", CreatedBy = "creator1@example.com" },
+            new Quiz { Id = Guid.NewGuid(), Category = Constants.Category.Art, Title = "Quiz 2", CreatedBy = "creator2@example.com" }
+        );
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _repository.GetTotalQuizzesCreatedAsync();
+
+        // Assert
+        Assert.Equal(2, result);
+    }
+
+    [Fact]
+    public async Task GetAverageQuizzesTakenPerUserAsync_ReturnsCorrectAverage()
+    {
+        // Arrange
+        _context.QuizAttempts.AddRange(
+            new QuizAttempt { UserEmail = "user1@example.com", QuizId = Guid.NewGuid(), IsCompleted = true },
+            new QuizAttempt { UserEmail = "user2@example.com", QuizId = Guid.NewGuid(), IsCompleted = true },
+            new QuizAttempt { UserEmail = "user1@example.com", QuizId = Guid.NewGuid(), IsCompleted = true }
+        );
+        await _context.SaveChangesAsync();
+
+        // Act
+        var result = await _repository.GetAverageQuizzesTakenPerUserAsync();
+
+        // Assert
+        Assert.Equal(1.5, result);
+    }
+
+    [Fact]
+    public async Task GetAverageQuizzesTakenPerUserAsync_ReturnsZeroWhenNoUsers()
+    {
+        // Act
+        var result = await _repository.GetAverageQuizzesTakenPerUserAsync();
+
+        // Assert
+        Assert.Equal(0, result);
+    }
 }
