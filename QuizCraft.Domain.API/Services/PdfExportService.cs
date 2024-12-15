@@ -2,10 +2,6 @@ using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
-using iText.Kernel.Font;
-using System.IO;
-using System.Threading.Tasks;
-using QuizCraft.Domain.API.Exceptions;
 
 namespace QuizCraft.Domain.API.Services;
 

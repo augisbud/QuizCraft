@@ -38,7 +38,7 @@ public class TestAuthHandler : AuthenticationHandler<AuthenticationSchemeOptions
     }
 }
 
-public class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory(IEnumerable<KeyValuePair<string, string?>>? configuration) : WebApplicationFactory<Program>
 {
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -46,13 +46,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
         builder.UseConfiguration(
             new ConfigurationBuilder()
-                .AddInMemoryCollection(
-                [
-                    new KeyValuePair<string, string?>("GeminiAPIKey", "fake-api-key"),
-                    new KeyValuePair<string, string?>("Frontend:Url", "http://localhost:3000"),
-                    new KeyValuePair<string, string?>("Authentication:Google:ClientId", "12345"),
-                    new KeyValuePair<string, string?>("Authentication:Google:ClientSecret", "12345")
-                ])
+                .AddInMemoryCollection(configuration)
                 .Build()
         );
 

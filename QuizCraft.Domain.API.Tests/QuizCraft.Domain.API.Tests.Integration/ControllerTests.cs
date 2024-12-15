@@ -8,7 +8,8 @@ using QuizCraft.Domain.API.Data;
 using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace QuizCraft.Domain.API.Tests.Integration;
 
@@ -81,6 +82,28 @@ public class QuizControllerTests : IClassFixture<ControllerTestsFixture>
         Assert.Equal(quizId, data.Id);
         var expectedQuiz = DataFixture.Quizzes.First(q => q.Id == quizId);
         Assert.Equal(expectedQuiz.Title, data.Title);
+    }
+
+    [Fact]
+    public async Task GetDetailedQuizDto_ReturnsQuizNotFoundException()
+    {
+        // Arrange
+        var client = _fixture.Factory.CreateClient();
+        var token = GenerateJwtToken(_jwtSecurityTokenHandler, "user@example.com");
+        client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+        var quizId = Guid.NewGuid();
+
+        // Act
+        var response = await client.GetAsync($"/quizzes/{quizId}/questions");
+
+        // Assert
+        Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
+
+        var data = JsonConvert.DeserializeObject<ProblemDetails>(await response.Content.ReadAsStringAsync());
+
+        Assert.NotNull(data);
+        Assert.Equal(StatusCodes.Status404NotFound, data.Status);
+        Assert.Equal($"Quiz with id: {quizId} was not found.", data.Title);
     }
 
     [Fact]

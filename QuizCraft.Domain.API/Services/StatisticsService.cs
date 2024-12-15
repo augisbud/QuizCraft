@@ -4,7 +4,6 @@ using QuizCraft.Domain.API.Exceptions;
 using QuizCraft.Domain.API.Extensions;
 using QuizCraft.Domain.API.Models;
 using QuizCraft.Domain.API.Repositories;
-using System.Collections.Concurrent;
 
 namespace QuizCraft.Domain.API.Services;
 

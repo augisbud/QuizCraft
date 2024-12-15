@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using System.IdentityModel.Tokens.Jwt;
 using Serilog;
+using QuizCraft.Domain.API.Handlers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -90,6 +91,8 @@ builder.Services.AddScoped<IQuizService, QuizService>();
 builder.Services.AddScoped<IStatisticsService, StatisticsService>();
 builder.Services.AddScoped<IPdfExportService, PdfExportService>();
 
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
 
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Warning()
@@ -102,6 +105,8 @@ builder.Host.UseSerilog();
 var app = builder.Build();
 
 app.UseCors("AllowFrontend");
+
+app.UseExceptionHandler();
 
 app.UseSwagger();
 app.UseSwaggerUI();
