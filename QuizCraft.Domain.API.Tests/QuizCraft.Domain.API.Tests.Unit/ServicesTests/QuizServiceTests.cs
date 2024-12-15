@@ -41,16 +41,16 @@ public class QuizServiceTests
         var token = GenerateToken("test@example.com");
         var geminiResponse = new Output(
             [
-                new Candidate(
-                    new Content(
-                        [
-                            new Part("{\"Title\":\"Sample Quiz\",\"Category\":\"Art\",\"Questions\":[]}")
-                        ],
-                        null
-                    ),
-                    null!,
+            new Candidate(
+                new Content(
+                    [
+                        new Part("{\"Title\":\"Sample Quiz\",\"Category\":\"Art\",\"Questions\":[]}")
+                    ],
                     null
-                )
+                ),
+                null!,
+                null
+            )
             ],
             new UsageMetadata(0, 0, 0)
         );
@@ -59,7 +59,7 @@ public class QuizServiceTests
         {
             Title = "Sample Quiz",
             Category = Constants.Category.Art,
-            Questions = []
+            Questions = new List<QuestionForCreationDto>()
         };
 
         var quiz = new Quiz
@@ -177,7 +177,7 @@ public class QuizServiceTests
         };
 
         _quizRepository.Setup(x => x.RetrieveQuizWithQuestionsById(quizId)).Returns(quiz);
-        _mapper.Setup(x => x.Map<IEnumerable<QuestionDto>>(It.IsAny<IEnumerable<Question>>())).Returns([]);
+        _mapper.Setup(x => x.Map<IEnumerable<QuestionDto>>(It.IsAny<IEnumerable<Question>>())).Returns(new List<QuestionDto>());
 
         // Act
         var result = await _quizService.RetrieveQuestions(quizId, token);
@@ -195,7 +195,7 @@ public class QuizServiceTests
         var quizId = Guid.NewGuid();
         var token = GenerateToken("test@example.com");
 
-        _quizRepository.Setup(x => x.RetrieveQuizWithQuestionsById(quizId)).Returns((Quiz) null!);
+        _quizRepository.Setup(x => x.RetrieveQuizWithQuestionsById(quizId)).Returns((Quiz)null!);
 
         // Act & Assert
         await Assert.ThrowsAsync<QuizNotFoundException>(() => _quizService.RetrieveQuestions(quizId, token));
@@ -232,7 +232,7 @@ public class QuizServiceTests
         var token = GenerateToken("test@example.com");
         var answerAttemptDto = new AnswerAttemptDto(Guid.NewGuid());
 
-        _quizRepository.Setup(x => x.RetrieveAnswer(quizId, questionId)).Returns((AnswerDto) null!);
+        _quizRepository.Setup(x => x.RetrieveAnswer(quizId, questionId)).Returns((AnswerDto)null!);
 
         // Act & Assert
         Assert.Throws<AnswerNotFoundException>(() => _quizService.ValidateAnswer(token, quizId, questionId, answerAttemptDto));
@@ -280,6 +280,141 @@ public class QuizServiceTests
 
         // Act & Assert
         await Assert.ThrowsAsync<UnauthorizedAccessException>(() => _quizService.DeleteQuiz(token, quizId));
+    }
+
+    [Fact]
+    public async Task RetrieveQuestions_HandlesExistingQuizAttempt()
+    {
+        // Arrange
+        var quizId = Guid.NewGuid();
+        var token = GenerateToken("test@example.com");
+        var quiz = new Quiz
+        {
+            Id = quizId,
+            Title = "Test Quiz",
+            Category = Constants.Category.Art,
+            CreatedBy = "test@example.com",
+            Questions =
+            [
+                new() {
+                    Id = Guid.NewGuid(),
+                    Text = "Test Question 1",
+                    QuizId = quizId
+                },
+                new() {
+                    Id = Guid.NewGuid(),
+                    Text = "Test Question 2",
+                    QuizId = quizId
+                }
+            ]
+        };
+        quiz.QuizAttempts =
+        [
+            new QuizAttempt
+            {
+                QuizId = quizId,
+                UserEmail = "test@example.com",
+                IsCompleted = false,
+                QuizAnswerAttempts =
+                [
+                    new QuizAnswerAttempt { QuestionId = quiz.Questions.First().Id, QuizAttemptId = quizId, AnswerId = Guid.NewGuid() }
+                ]
+            }
+        ];
+
+        _quizRepository.Setup(x => x.RetrieveQuizWithQuestionsById(quizId)).Returns(quiz);
+
+        // Act
+        var result = await _quizService.RetrieveQuestions(quizId, token);
+
+        // Assert
+        Assert.NotEqual(Guid.Empty, result.CurrentQuestionId);
+    }
+
+    [Fact]
+    public async Task RetrieveQuestions_CompletesQuizAttemptWhenAllQuestionsAnswered()
+    {
+        // Arrange
+        var quizId = Guid.NewGuid();
+        var token = GenerateToken("test@example.com");
+        var quiz = new Quiz
+        {
+            Id = quizId,
+            Title = "Test Quiz",
+            Category = Constants.Category.Art,
+            CreatedBy = "test@example.com",
+            Questions =
+            [
+                new() { Id = Guid.NewGuid(), Text = "Test Question", QuizId = quizId }
+            ]
+        };
+        quiz.QuizAttempts =
+        [
+            new QuizAttempt
+            {
+                QuizId = quizId,
+                UserEmail = "test@example.com",
+                IsCompleted = false,
+                QuizAnswerAttempts =
+                [
+                    new QuizAnswerAttempt { QuestionId = quiz.Questions.First().Id, QuizAttemptId = quizId, AnswerId = Guid.NewGuid() }
+                ]
+            }
+        ];
+
+        _quizRepository.Setup(x => x.RetrieveQuizWithQuestionsById(quizId)).Returns(quiz);
+        _quizAttemptRepository.Setup(x => x.RetrieveQuizAttempt(quizId, "test@example.com")).Returns(quiz.QuizAttempts.First());
+
+        // Act
+        var result = await _quizService.RetrieveQuestions(quizId, token);
+
+        // Assert
+        _quizAttemptRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task CompleteQuizAttempt_MarksAttemptAsCompleted()
+    {
+        // Arrange
+        var quizId = Guid.NewGuid();
+        var token = GenerateToken("test@example.com");
+        var quizAttempt = new QuizAttempt
+        {
+            QuizId = quizId,
+            UserEmail = "test@example.com",
+            IsCompleted = false
+        };
+
+        _quizAttemptRepository.Setup(x => x.RetrieveQuizAttempt(quizId, "test@example.com")).Returns(quizAttempt);
+
+        // Act
+        await _quizService.CompleteQuizAttempt(token, quizId);
+
+        // Assert
+        Assert.True(quizAttempt.IsCompleted);
+        _quizAttemptRepository.Verify(x => x.SaveChangesAsync(), Times.Once);
+    }
+
+    [Fact]
+    public async Task RetrieveQuestions_ThrowsQuestionsNotFoundException_WhenNoQuestionsExist()
+    {
+        // Arrange
+        var quizId = Guid.NewGuid();
+        var token = GenerateToken("test@example.com");
+        var quiz = new Quiz
+        {
+            Id = quizId,
+            Title = "Empty Quiz",
+            Category = Constants.Category.Art,
+            Questions = new List<Question>(), // No questions
+            QuizAttempts = new List<QuizAttempt>(),
+            CreatedBy = "test@example.com"
+        };
+
+        _quizRepository.Setup(x => x.RetrieveQuizWithQuestionsById(quizId)).Returns(quiz);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<QuestionsNotFoundException>(() => _quizService.RetrieveQuestions(quizId, token));
     }
 
     private string GenerateToken(string email)
