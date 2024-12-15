@@ -153,4 +153,25 @@ public class QuizControllerTests
         // Assert
         Assert.IsType<OkResult>(result);
     }
+
+    [Fact]
+    public async Task ExportQuizToPdf_ReturnsPdfFile()
+    {
+        // Arrange
+        var token = "test-token";
+        _controller.HttpContext.Request.Headers.Authorization = $"Bearer {token}";
+
+        var quizId = Guid.NewGuid();
+        var pdfContent = new byte[] { 1, 2, 3, 4, 5 };
+        _pdfExportService.Setup(x => x.GenerateQuizPdfAsync(It.IsAny<Guid>(), It.IsAny<string>())).ReturnsAsync(pdfContent);
+
+        // Act
+        var result = await _controller.ExportQuizToPdf(quizId);
+
+        // Assert
+        var fileResult = Assert.IsType<FileContentResult>(result);
+        Assert.Equal("application/pdf", fileResult.ContentType);
+        Assert.Equal($"quiz_{quizId}.pdf", fileResult.FileDownloadName);
+        Assert.Equal(pdfContent, fileResult.FileContents);
+    }
 }
