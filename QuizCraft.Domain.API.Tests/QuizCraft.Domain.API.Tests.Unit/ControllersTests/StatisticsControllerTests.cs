@@ -59,4 +59,27 @@ public class StatisticsControllerTest
         Assert.Single(returnValue.Attempts);
         Assert.Equal(1, returnValue.Attempts[0].CorrectAnswers);
     }
+
+    [Fact]
+    public async Task GetGlobalStatisticsAsync_ReturnsExpectedResult()
+    {
+        // Arrange
+        var globalStatsDto = new GlobalStatsDto
+        {
+            TotalUsers = 100,
+            TotalQuizzesCreated = 50,
+            AverageQuizzesPerUser = 2.0
+        };
+
+        _statisticsServiceMock.Setup(s => s.GlobalStatisticsAsync()).ReturnsAsync(globalStatsDto);
+
+        // Act
+        var result = await _controller.GetGlobalStatisticsAsync();
+
+        // Assert
+        var returnValue = Assert.IsType<GlobalStatsDto>(result);
+        Assert.Equal(100, returnValue.TotalUsers);
+        Assert.Equal(50, returnValue.TotalQuizzesCreated);
+        Assert.Equal(2.0, returnValue.AverageQuizzesPerUser);
+    }
 }

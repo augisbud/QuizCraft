@@ -86,4 +86,23 @@ public class GeminiAPIClientTests
         // Act & Assert
         await Assert.ThrowsAsync<HttpRequestException>(() => _geminiAPIClient.PostAsync(prompt));
     }
+
+    [Fact]
+    public async Task PostAsync_EmptyOrInvalidResponse_ThrowsException()
+    {
+        // Arrange
+        var prompt = "Test prompt";
+
+        var httpResponseMessage = new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("{\"Candidates\":[],\"UsageMetadata\":{\"PromptTokenCount\":1,\"CandidatesTokenCount\":1,\"TotalTokenCount\":2}}", System.Text.Encoding.UTF8, "application/json")
+        };
+
+        _httpMessageHandler.Protected()
+            .Setup<Task<HttpResponseMessage>>("SendAsync", ItExpr.IsAny<HttpRequestMessage>(), ItExpr.IsAny<CancellationToken>())
+            .ReturnsAsync(httpResponseMessage);
+
+        // Act & Assert
+        await Assert.ThrowsAsync<HttpRequestException>(() => _geminiAPIClient.PostAsync(prompt));
+    }
 }
