@@ -23,13 +23,6 @@ public class StatisticsService(IQuizRepository quizRepository, IQuizAttemptRepos
         };
     }
 
-    private static string RetrieveEmail(JwtSecurityTokenHandler jwtSecurityTokenHandler, string token)
-    {
-        var jwtToken = jwtSecurityTokenHandler.ReadJwtToken(token);
-
-        return jwtToken.Claims.First(c => c.Type == "email").Value;
-    }
-
     public async Task<GlobalStatsDto> GlobalStatisticsAsync()
     {
         var userEmailsQuery = (await quizAttemptRepository.RetrieveAllAsync())
