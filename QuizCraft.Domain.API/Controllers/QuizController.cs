@@ -6,7 +6,7 @@ using QuizCraft.Domain.API.Services;
 namespace QuizCraft.Domain.API.Controllers;
 
 [ApiController]
-public class QuizController(IQuizService quizService, IFileProcessingService fileProcessingService) : ControllerBase
+public class QuizController(IQuizService quizService, IFileProcessingService fileProcessingService, IPdfExportService pdfExportService) : ControllerBase
 {
     [Authorize]
     [HttpPost("/quizzes")]
@@ -73,5 +73,17 @@ public class QuizController(IQuizService quizService, IFileProcessingService fil
         await quizService.DeleteQuiz(token, quizId);
 
         return Ok();
+    }
+
+    [Authorize]
+    [HttpGet("{quizId}/export-pdf")]
+    [Produces("application/pdf")]
+    public async Task<IActionResult> ExportQuizToPdf(Guid quizId)
+    {
+        var token = HttpContext.Request.Headers.Authorization.First()!.Replace("Bearer ", "");
+
+        var pdfBytes = await pdfExportService.GenerateQuizPdfAsync(quizId, token);
+
+        return File(pdfBytes, "application/pdf", $"quiz_{quizId}.pdf");
     }
 }
