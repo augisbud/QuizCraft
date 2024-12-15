@@ -101,4 +101,92 @@ public class StatisticsServiceTests
         Assert.Equal(1, data.Attempts.First().CorrectAnswers);
         Assert.Equal(now, data.Attempts.First().StartedAt);
     }
+
+    [Fact]
+    public async Task GlobalStatisticsAsync_Returns_Expected()
+    {
+        // Arrange
+        var quizAttempts = new List<QuizAttempt>
+        {
+            new() 
+            {
+                Id = Guid.NewGuid(),
+                QuizId = Guid.NewGuid(),
+                UserEmail = "user1@test.com",
+                IsCompleted = true,
+                StartedAt = DateTime.UtcNow
+            },
+            new() 
+            {
+                Id = Guid.NewGuid(),
+                QuizId = Guid.NewGuid(),
+                UserEmail = "user2@test.com",
+                IsCompleted = true,
+                StartedAt = DateTime.UtcNow
+            },
+            new() 
+            {
+                Id = Guid.NewGuid(),
+                QuizId = Guid.NewGuid(),
+                UserEmail = "user1@test.com",
+                IsCompleted = true,
+                StartedAt = DateTime.UtcNow
+            }
+        };
+
+        var quizzes = new List<Quiz>
+        {
+            new() 
+            {
+                Id = Guid.NewGuid(),
+                Title = "Quiz 1",
+                Category = Constants.Category.Science,
+                CreatedBy = "creator@test.com"
+            },
+            new() 
+            {
+                Id = Guid.NewGuid(),
+                Title = "Quiz 2",
+                Category = Constants.Category.Art,
+                CreatedBy = "creator@test.com"
+            }
+        };
+
+        _quizAttemptRepository
+            .Setup(x => x.RetrieveAllAsync())
+            .ReturnsAsync(quizAttempts);
+
+        _quizRepository
+            .Setup(x => x.RetrieveAllAsync())
+            .ReturnsAsync(quizzes);
+
+        // Act
+        var result = await _statisticsService.GlobalStatisticsAsync();
+
+        // Assert
+        Assert.Equal(2, result.TotalUsers);
+        Assert.Equal(2, result.TotalQuizzesCreated);
+        Assert.Equal(1.5, result.AverageQuizzesPerUser);
+    }
+
+    [Fact]
+    public async Task GlobalStatisticsAsync_Returns_Zero_When_No_Data()
+    {
+        // Arrange
+        _quizAttemptRepository
+            .Setup(x => x.RetrieveAllAsync())
+            .ReturnsAsync([]);
+
+        _quizRepository
+            .Setup(x => x.RetrieveAllAsync())
+            .ReturnsAsync([]);
+
+        // Act
+        var result = await _statisticsService.GlobalStatisticsAsync();
+
+        // Assert
+        Assert.Equal(0, result.TotalUsers);
+        Assert.Equal(0, result.TotalQuizzesCreated);
+        Assert.Equal(0, result.AverageQuizzesPerUser);
+    }
 }
