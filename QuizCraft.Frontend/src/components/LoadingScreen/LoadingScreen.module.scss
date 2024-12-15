@@ -4,44 +4,50 @@
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.9);
+    background: rgba(85,162,158, 1);
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start; /* Keeps items at the top */
+    justify-content: center;
     align-items: center;
-    padding-top: 50px; /* Adjust vertical spacing */
     z-index: 1000;
 }
 
-.spinnerContainer {
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Keeps spinner horizontally centered within the container */
-    margin-left: 20px; /* Moves the spinner slightly to the right */
-}
-
-.spinner {
-    border: 6px solid rgba(255, 255, 255, 0.3); /* Thinner border */
-    border-top: 6px solid #fff; /* Thinner spinning part */
-    border-radius: 50%;
-    width: 30px; /* Smaller spinner size */
-    height: 30px;
-    animation: spin 1.5s linear infinite;
+.loadingBarContainer {
+    text-align: center;
+    color: #fff;
 }
 
 .loadingText {
-    margin-top: 16px; /* Smaller spacing between spinner and text */
-    color: white;
-    font-size: 1.2rem; /* Slightly smaller text */
-    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
 }
 
-@keyframes spin {
+.loadingBar {
+    width: 300px;
+    height: 10px;
+    background: #333;
+    border-radius: 5px;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress {
+    height: 100%;
+    width: 0;
+    background: #fff;
+    animation: progressAnimation 2s infinite;
+    border-radius: 5px;
+}
+
+@keyframes progressAnimation {
     0% {
-        transform: rotate(0deg);
+        width: 0%;
+    }
+
+    50% {
+        width: 50%;
     }
 
     100% {
-        transform: rotate(360deg);
+        width: 100%;
     }
 }

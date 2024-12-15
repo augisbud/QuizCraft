@@ -5,7 +5,7 @@ import { CloudUpload } from "@mui/icons-material";
 import styles from "./CreateQuiz.module.scss";
 import { useNavigate } from "react-router-dom";
 import { BackendUri } from "../../utils/Environment";
-import { LoadingScreen } from "../../components/LoadingScreen/LoadingScreen"
+import { LoadingScreen } from "../../components/LoadingScreen/LoadingScreen";
 
 export const CreateQuiz = () => {
   const navigate = useNavigate();
