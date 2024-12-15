@@ -6,7 +6,6 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     background-color: $primary-color;
 }
 
@@ -24,7 +23,6 @@
     border-radius: 1rem;
     box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
     background-color: $background-color;
-    width: 100%;
     color: $text-color;
     font-weight: bold;
     font-size: 1.5rem;

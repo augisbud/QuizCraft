@@ -7,6 +7,7 @@ import PublicIcon from '@mui/icons-material/Public';
 import CircularProgress from '@mui/material/CircularProgress';
 import styles from './Home.module.scss';
 import { GlobalStatsDto } from '../../types.ts';
+import { BackendUri } from "../../utils/Environment.ts";
 
 export const Home = () => {
     const [stats, setStats] = useState<GlobalStatsDto | null>(null);
@@ -15,7 +16,7 @@ export const Home = () => {
     useEffect(() => {
         const fetchStats = async () => {
             try {
-                const response = await fetch("https://localhost:8080/statistics/global");
+                const response = await fetch(`${BackendUri}/statistics/global`);
                 if (!response.ok) {
                     throw new Error("Failed to fetch global statistics");
                 }
