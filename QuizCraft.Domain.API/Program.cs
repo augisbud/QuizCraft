@@ -115,16 +115,6 @@ app.MapControllers();
 
 app.MapHealthChecks("/health");
 
-app.Use(async (context, next) =>
-{
-    if (context.Request.Path.StartsWithSegments("/favicon.ico"))
-    {
-        context.Response.StatusCode = 204;
-        return;
-    }
-    await next();
-});
-
 app.Run();
 
 public partial class Program { }
