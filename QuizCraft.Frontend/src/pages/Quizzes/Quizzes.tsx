@@ -1,4 +1,4 @@
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box, IconButton } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Box } from "@mui/material";
 import { Navbar } from "../../components/Navbar/Navbar";
 import Paper from "@mui/material/Paper";
 import { Link } from "react-router-dom";
@@ -90,9 +90,9 @@ export const Quizzes = () => {
                                                 <DeleteOutline fontSize="large" />
                                             </span>
                                         )}
-                                        <IconButton onClick={() => handleDownload(row.id)}>
+                                        <span onClick={() => handleDownload(row.id)}>
                                             <Download fontSize="large" />
-                                        </IconButton>
+                                        </span>
                                     </TableCell>
                                 </TableRow>
                             ))}
