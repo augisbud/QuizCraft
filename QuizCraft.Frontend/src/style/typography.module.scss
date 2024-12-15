@@ -4,39 +4,39 @@ body {
     font-family: $font-family;
     font-size: $font-size-base;
     color: $text-color;
-    background-color: $background-color;
+    background-color: $primary-color;
     line-height: 1.5;
 }
 
 %h1 {
-    font-size: 96px;
-    color: $primary-color;
+    font-size: 80px;
+    color: $text-color;
 }
 
 %h2 {
-    font-size: 96px;
+    font-size: 60px;
     font-weight: 300;
-    color: $secondary-color;
+    color: $text-color;
 }
 
 %h3 {
     font-size: 48px;
     font-weight: normal;
-    color: $primary-color;
+    color: $text-color;
 }
 
 %h4 {
     font-size: $font-size-small;
     font-family: $font-family;
     font-weight: normal;
-    color: $primary-color;
+    color: $text-color;
 }
 
 %h5 {
     font-size: $font-size-small;
     font-family: $font-family;
     font-weight: normal;
-    color: $primary-color;
+    color: $text-color;
 }
 
 %p {

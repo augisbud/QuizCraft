@@ -65,33 +65,36 @@ public class BaseRepositoryTests : IDisposable
     }
 
     [Fact]
-    public void RetrieveAll_ReturnsAllEntities()
+    public async Task RetrieveAll_ReturnsAllEntities()
     {
         // Arrange
         var entities = new List<QuizAttempt>
+        {
+            new()
             {
-                new() {
-                    QuizId = Guid.NewGuid(),
-                    UserEmail = "user1@example.com",
-                    IsCompleted = false
-                },
-                new() {
-                    QuizId = Guid.NewGuid(),
-                    UserEmail = "user2@example.com",
-                    IsCompleted = true
-                }
-            };
+                QuizId = Guid.NewGuid(),
+                UserEmail = "user1@example.com",
+                IsCompleted = false
+            },
+            new()
+            {
+                QuizId = Guid.NewGuid(),
+                UserEmail = "user2@example.com",
+                IsCompleted = true
+            }
+        };
         _context.QuizAttempts.AddRange(entities);
-        _context.SaveChanges();
+        await _context.SaveChangesAsync();
 
         // Act
-        var result = _repository.RetrieveAll();
+        var result = await _repository.RetrieveAllAsync();
 
         // Assert
         Assert.Equal(2, result.Count());
         Assert.Contains(result, e => e.Id == entities[0].Id);
         Assert.Contains(result, e => e.Id == entities[1].Id);
     }
+
 
     [Fact]
     public async Task RetrieveByIdAsync_ReturnsEntity()

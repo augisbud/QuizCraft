@@ -1,0 +1,38 @@
+@use '../../style/variables.scss' as *;
+
+.main-container {
+    padding: 2rem 1rem;
+    margin-top: 2rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: $primary-color;
+}
+
+.global-stats-header {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+    align-items: center;
+    color: $text-color;
+}
+
+.stat-item {
+    border: 10px solid $secondary-color;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 1px 1px 5px rgba(0, 0, 0, 0.1);
+    background-color: $background-color;
+    width: 100%;
+    color: $text-color;
+    font-weight: bold;
+    font-size: 1.5rem;
+}
+
+.no-stats {
+    text-align: center;
+    color: $text-color;
+    font-weight: bold;
+    font-size: 1.5rem;
+}

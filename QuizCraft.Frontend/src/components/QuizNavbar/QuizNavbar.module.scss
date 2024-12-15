@@ -1,8 +1,10 @@
+@use '../../style/variables.scss' as *;
+
 .quiz-navbar {
     margin-top: 2px;
     justify-content: space-between;
     padding: 10px 20px;
-    background-color: #f8f9fa;
+    background-color: $secondary-color;
 }
 
 .navbarContainer {
