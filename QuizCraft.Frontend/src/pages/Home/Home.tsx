@@ -5,7 +5,7 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import PublicIcon from '@mui/icons-material/Public';
 import CircularProgress from '@mui/material/CircularProgress';
-import styles from './home.module.scss';
+import styles from './Home.module.scss';
 import { GlobalStatsDto } from '../../types.ts';
 
 export const Home = () => {
