@@ -11,6 +11,7 @@ export const CreateQuiz = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     if (!sessionStorage.getItem("token"))
@@ -32,13 +33,18 @@ export const CreateQuiz = () => {
       return;
     }
 
-    setLoading(true);
+  setLoading(true);
+  setProgress(0);
 
     const formData = new FormData();
     formData.append("file", fileToUpload);
 
     try {
       const token = sessionStorage.getItem("token");
+
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => (prev < 90 ? prev + 10 : prev)); // Simulate progress up to 90%
+      }, 500);
 
       const response = await fetch(`${BackendUri}/quizzes`, {
         method: "POST",
@@ -48,14 +54,17 @@ export const CreateQuiz = () => {
         },
       });
 
-      if (response.ok) {
-        const id = (await response.json()) as string;
-        navigate(`/quizzes/${id}`);
+      clearInterval(progressInterval);
+
+        if (response.ok) {
+            setProgress(100);
+            const id = (await response.json()) as string;
+            navigate(`/quizzes/${id}`);
       } else if (response.status === 401) {
-        alert("You are not authorized. Please sign in.");
-        navigate("/signin");
+            alert("You are not authorized. Please sign in.");
+            navigate("/signin");
       } else {
-        alert("File upload failed.");
+            alert("File upload failed.");
       }
     } catch (error) {
       console.error("Error during file upload:", error);
@@ -81,7 +90,7 @@ export const CreateQuiz = () => {
         <>
             <Navbar />
             <div className={styles.mainContainer}>
-                {loading && <LoadingScreen />}
+                {loading && <LoadingScreen progress={ progress } />}
                 <div className={styles.quizUploaderContainer}>
                     <div className={styles.uploadSection}>
                         <h3>Upload File</h3>
