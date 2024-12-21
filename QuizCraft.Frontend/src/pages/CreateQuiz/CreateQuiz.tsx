@@ -1,15 +1,17 @@
 import { ChangeEvent, useEffect, useState } from "react";
 import { Navbar } from "../../components/Navbar/Navbar";
-import { Button, styled, CircularProgress } from "@mui/material";
+import { Button, styled } from "@mui/material";
 import { CloudUpload } from "@mui/icons-material";
 import styles from "./CreateQuiz.module.scss";
 import { useNavigate } from "react-router-dom";
 import { BackendUri } from "../../utils/Environment";
+import { LoadingScreen } from "../../components/LoadingScreen/LoadingScreen";
 
 export const CreateQuiz = () => {
   const navigate = useNavigate();
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState<number>(0);
 
   useEffect(() => {
     if (!sessionStorage.getItem("token"))
@@ -31,13 +33,18 @@ export const CreateQuiz = () => {
       return;
     }
 
-    setLoading(true);
+  setLoading(true);
+  setProgress(0);
 
     const formData = new FormData();
     formData.append("file", fileToUpload);
 
     try {
       const token = sessionStorage.getItem("token");
+
+      const progressInterval = setInterval(() => {
+        setProgress((prev) => (prev < 90 ? prev + 10 : prev)); // Simulate progress up to 90%
+      }, 500);
 
       const response = await fetch(`${BackendUri}/quizzes`, {
         method: "POST",
@@ -47,14 +54,17 @@ export const CreateQuiz = () => {
         },
       });
 
-      if (response.ok) {
-        const id = (await response.json()) as string;
-        navigate(`/quizzes/${id}`);
+      clearInterval(progressInterval);
+
+        if (response.ok) {
+            setProgress(100);
+            const id = (await response.json()) as string;
+            navigate(`/quizzes/${id}`);
       } else if (response.status === 401) {
-        alert("You are not authorized. Please sign in.");
-        navigate("/signin");
+            alert("You are not authorized. Please sign in.");
+            navigate("/signin");
       } else {
-        alert("File upload failed.");
+            alert("File upload failed.");
       }
     } catch (error) {
       console.error("Error during file upload:", error);
@@ -76,31 +86,28 @@ export const CreateQuiz = () => {
     width: 1,
   });
 
-  return (
-    <>
-      <Navbar />
-      <div className={styles.mainContainer}>
-        <div className={styles.quizUploaderContainer}>
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <div className={styles.uploadSection}>
-              <h3>Upload File</h3>
-              <Button
-                component="label"
-                role={undefined}
-                variant="contained"
-                tabIndex={-1}
-                startIcon={<CloudUpload />}
-              >
-                Upload Quiz
-                <VisuallyHiddenInput type="file" onChange={handleFileChange} />
-              </Button>
-              {file && <p>Selected File: {file.name}</p>}
+    return (
+        <>
+            <Navbar />
+            <div className={styles.mainContainer}>
+                {loading && <LoadingScreen progress={ progress } />}
+                <div className={styles.quizUploaderContainer}>
+                    <div className={styles.uploadSection}>
+                        <h3>Upload File</h3>
+                        <Button
+                            component="label"
+                            role={undefined}
+                            variant="contained"
+                            tabIndex={-1}
+                            startIcon={<CloudUpload />}
+                        >
+                            Upload File
+                            <VisuallyHiddenInput type="file" onChange={handleFileChange} />
+                        </Button>
+                        {file && <p>Selected File: {file.name}</p>}
+                    </div>
+                </div>
             </div>
-          )}
-        </div>
-      </div>
-    </>
-  );
+        </>
+    );
 };
