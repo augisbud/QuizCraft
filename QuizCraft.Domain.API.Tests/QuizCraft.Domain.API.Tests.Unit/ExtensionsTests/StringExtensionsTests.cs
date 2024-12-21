@@ -1,6 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using QuizCraft.Domain.API.Extensions;
+using QuizCraft.Domain.Logic.Extensions;
 
 namespace QuizCraft.Domain.API.Tests.Unit.ExtensionsTests;
 

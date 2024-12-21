@@ -1,7 +1,7 @@
 using Moq;
-using QuizCraft.Domain.API.Exceptions;
-using QuizCraft.Domain.API.Models;
-using QuizCraft.Domain.API.Services;
+using QuizCraft.Domain.Logic.Exceptions;
+using QuizCraft.Domain.Data.Models;
+using QuizCraft.Domain.Logic.Services;
 
 namespace QuizCraft.Domain.API.Tests.Unit.ServicesTests;
 

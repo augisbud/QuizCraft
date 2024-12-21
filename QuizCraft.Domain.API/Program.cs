@@ -1,10 +1,10 @@
-using QuizCraft.Domain.API.APIClients;
-using QuizCraft.Domain.API.Services;
+using QuizCraft.Domain.Logic.APIClients;
+using QuizCraft.Domain.Logic.Services;
 using Microsoft.OpenApi.Models;
 using Microsoft.EntityFrameworkCore;
-using QuizCraft.Domain.API.Data;
-using QuizCraft.Domain.API.Repositories;
-using QuizCraft.Domain.API.Profiles;
+using QuizCraft.Domain.Data.Data;
+using QuizCraft.Domain.Data.Repositories;
+using QuizCraft.Domain.Data.Profiles;
 using AutoMapper.EquivalencyExpression;
 using QuizCraft.Domain.API.Filters;
 using Microsoft.IdentityModel.Tokens;

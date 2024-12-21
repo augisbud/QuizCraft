@@ -1,9 +1,9 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using QuizCraft.Domain.API.Entities;
-using QuizCraft.Domain.API.Models;
-using QuizCraft.Domain.API.Profiles;
-using QuizCraft.Domain.API.Repositories;
+using QuizCraft.Domain.Data.Entities;
+using QuizCraft.Domain.Data.Models;
+using QuizCraft.Domain.Data.Profiles;
+using QuizCraft.Domain.Data.Repositories;
 
 namespace QuizCraft.Domain.API.Tests.Unit.RepositoriesTests;
 

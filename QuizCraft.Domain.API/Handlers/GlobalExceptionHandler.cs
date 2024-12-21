@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using QuizCraft.Domain.API.Exceptions;
+using QuizCraft.Domain.Logic.Exceptions;
 
 namespace QuizCraft.Domain.API.Handlers;
 

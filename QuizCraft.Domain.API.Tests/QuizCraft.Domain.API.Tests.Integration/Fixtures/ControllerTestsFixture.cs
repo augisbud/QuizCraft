@@ -1,5 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
-using QuizCraft.Domain.API.Data;
+using QuizCraft.Domain.Data.Data;
 using WireMock.Server;
 
 namespace QuizCraft.Domain.API.Tests.Integration.Fixtures;

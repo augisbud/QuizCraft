@@ -2,11 +2,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AutoMapper;
 using Moq;
-using QuizCraft.Domain.API.Entities;
-using QuizCraft.Domain.API.Exceptions;
-using QuizCraft.Domain.API.Models;
-using QuizCraft.Domain.API.Repositories;
-using QuizCraft.Domain.API.Services;
+using QuizCraft.Domain.Data.Entities;
+using QuizCraft.Domain.Logic.Exceptions;
+using QuizCraft.Domain.Data.Models;
+using QuizCraft.Domain.Data.Repositories;
+using QuizCraft.Domain.Logic.Services;
 
 namespace QuizCraft.Domain.API.Tests.Unit.ServicesTests;
 
@@ -31,7 +31,7 @@ public class StatisticsServiceTests
         var id = Guid.NewGuid();
 
         _quizRepository
-            .Setup(x => x.RetrieveByIdAsync(id, It.IsAny<System.Linq.Expressions.Expression<Func<Entities.Quiz, object>>[]>()))
+            .Setup(x => x.RetrieveByIdAsync(id, It.IsAny<System.Linq.Expressions.Expression<Func<Data.Entities.Quiz, object>>[]>()))
             .ReturnsAsync((Quiz)null!);
 
         // Act & Assert
@@ -47,12 +47,12 @@ public class StatisticsServiceTests
         var now = DateTime.Now;
 
         _quizRepository
-            .Setup(x => x.RetrieveByIdAsync(id, It.IsAny<System.Linq.Expressions.Expression<Func<Entities.Quiz, object>>[]>()))
+            .Setup(x => x.RetrieveByIdAsync(id, It.IsAny<System.Linq.Expressions.Expression<Func<Data.Entities.Quiz, object>>[]>()))
             .ReturnsAsync(new Quiz()
             {
                 Id = id,
                 Title = "Test Quiz",
-                Category = Constants.Category.Art,
+                Category = Data.Constants.Category.Art,
                 CreatedBy = "test@test.com",
                 Questions =
                 [
@@ -140,14 +140,14 @@ public class StatisticsServiceTests
             {
                 Id = Guid.NewGuid(),
                 Title = "Quiz 1",
-                Category = Constants.Category.Science,
+                Category = Data.Constants.Category.Science,
                 CreatedBy = "creator@test.com"
             },
             new() 
             {
                 Id = Guid.NewGuid(),
                 Title = "Quiz 2",
-                Category = Constants.Category.Art,
+                Category = Data.Constants.Category.Art,
                 CreatedBy = "creator@test.com"
             }
         };

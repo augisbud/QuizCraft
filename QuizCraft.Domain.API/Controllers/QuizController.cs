@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using QuizCraft.Domain.API.Models;
-using QuizCraft.Domain.API.Services;
+using QuizCraft.Domain.Data.Models;
+using QuizCraft.Domain.Logic.Services;
 
 namespace QuizCraft.Domain.API.Controllers;
 

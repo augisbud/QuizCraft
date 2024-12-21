@@ -1,8 +1,8 @@
 using System.Text;
 using Moq;
 using Microsoft.AspNetCore.Http;
-using QuizCraft.Domain.API.Services;
-using QuizCraft.Domain.API.Exceptions;
+using QuizCraft.Domain.Logic.Services;
+using QuizCraft.Domain.Logic.Exceptions;
 using Xceed.Words.NET;
 using iText.Kernel.Pdf;
 using iText.Layout;
