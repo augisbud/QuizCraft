@@ -1,9 +1,9 @@
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using QuizCraft.Domain.API.Data;
-using QuizCraft.Domain.API.Entities;
-using QuizCraft.Domain.API.Profiles;
-using QuizCraft.Domain.API.Repositories;
+using QuizCraft.Domain.Data.Data;
+using QuizCraft.Domain.Data.Entities;
+using QuizCraft.Domain.Data.Profiles;
+using QuizCraft.Domain.Data.Repositories;
 
 namespace QuizCraft.Domain.API.Tests.Unit.RepositoriesTests;
 
@@ -46,7 +46,7 @@ public class QuizRepositoryTests : IDisposable
         {
             Id = quizId,
             Title = "Sample Quiz",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             CreatedBy = "tester@example.com",
             Questions =
                 [
@@ -175,8 +175,8 @@ public class QuizRepositoryTests : IDisposable
     {
         // Arrange
         _context.Quizzes.AddRange(
-            new Quiz { Id = Guid.NewGuid(), Category = Constants.Category.Art, Title = "Quiz 1", CreatedBy = "creator1@example.com" },
-            new Quiz { Id = Guid.NewGuid(), Category = Constants.Category.Art, Title = "Quiz 2", CreatedBy = "creator2@example.com" }
+            new Quiz { Id = Guid.NewGuid(), Category = Data.Constants.Category.Art, Title = "Quiz 1", CreatedBy = "creator1@example.com" },
+            new Quiz { Id = Guid.NewGuid(), Category = Data.Constants.Category.Art, Title = "Quiz 2", CreatedBy = "creator2@example.com" }
         );
         await _context.SaveChangesAsync();
 

@@ -2,12 +2,13 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using AutoMapper;
 using Moq;
-using QuizCraft.Domain.API.APIClients;
-using QuizCraft.Domain.API.Entities;
-using QuizCraft.Domain.API.Exceptions;
-using QuizCraft.Domain.API.Models;
-using QuizCraft.Domain.API.Repositories;
-using QuizCraft.Domain.API.Services;
+using QuizCraft.Domain.Logic.APIClients;
+using QuizCraft.Domain.Data.Entities;
+using QuizCraft.Domain.Logic.Exceptions;
+using QuizCraft.Domain.Data.Models;
+using QuizCraft.Domain.Data.Repositories;
+using QuizCraft.Domain.Logic.Services;
+using QuizCraft.Domain.Data.Constants;
 
 namespace QuizCraft.Domain.API.Tests.Unit.ServicesTests;
 
@@ -58,14 +59,14 @@ public class QuizServiceTests
         var quizDtoForCreation = new QuizDtoForCreation
         {
             Title = "Sample Quiz",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             Questions = new List<QuestionForCreationDto>()
         };
 
         var quiz = new Quiz
         {
             Id = Guid.NewGuid(),
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             Title = "Sample Quiz",
             Questions = [],
             CreatedBy = "test@example.com"
@@ -119,8 +120,8 @@ public class QuizServiceTests
         // Arrange
         var quizzes = new List<QuizForTransferDto>
         {
-            new() { Id = Guid.NewGuid(), Title = "Quiz 1", Category = Constants.Category.Art, CreatedBy = "user1@example.com", CreatedAt = DateTime.Now },
-            new() { Id = Guid.NewGuid(), Title = "Quiz 2", Category = Constants.Category.Art, CreatedBy = "user2@example.com", CreatedAt = DateTime.Now }
+            new() { Id = Guid.NewGuid(), Title = "Quiz 1", Category = Data.Constants.Category.Art, CreatedBy = "user1@example.com", CreatedAt = DateTime.Now },
+            new() { Id = Guid.NewGuid(), Title = "Quiz 2", Category = Data.Constants.Category.Art, CreatedBy = "user2@example.com", CreatedAt = DateTime.Now }
         };
 
         _quizRepository.Setup(x => x.RetrieveProjected<Quiz, QuizForTransferDto>()).Returns(quizzes.AsQueryable());
@@ -141,8 +142,8 @@ public class QuizServiceTests
 
         var quizzes = new List<QuizForTransferDto>
         {
-            new() { Id = Guid.NewGuid(), Title = "Quiz 1", Category = Constants.Category.Art, CreatedBy = "user1@example.com", CreatedAt = DateTime.Now },
-            new() { Id = Guid.NewGuid(), Title = "Quiz 2", Category = Constants.Category.Art, CreatedBy = "user2@example.com", CreatedAt = DateTime.Now }
+            new() { Id = Guid.NewGuid(), Title = "Quiz 1", Category = Data.Constants.Category.Art, CreatedBy = "user1@example.com", CreatedAt = DateTime.Now },
+            new() { Id = Guid.NewGuid(), Title = "Quiz 2", Category = Data.Constants.Category.Art, CreatedBy = "user2@example.com", CreatedAt = DateTime.Now }
         };
 
         _quizRepository.Setup(x => x.RetrieveProjected<Quiz, QuizForTransferDto>()).Returns(quizzes.AsQueryable());
@@ -166,7 +167,7 @@ public class QuizServiceTests
         {
             Id = quizId,
             Title = "Sample Quiz",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             Questions =
             [
                 new Question { Id = Guid.NewGuid(), QuizId = quizId, Text = "Question 1" },
@@ -248,7 +249,7 @@ public class QuizServiceTests
         {
             Id = quizId,
             Title = "Test",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             CreatedBy = "test@example.com"
         };
 
@@ -272,7 +273,7 @@ public class QuizServiceTests
         {
             Id = quizId,
             Title = "Test",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             CreatedBy = "owner@example.com"
         };
 
@@ -292,7 +293,7 @@ public class QuizServiceTests
         {
             Id = quizId,
             Title = "Test Quiz",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             CreatedBy = "test@example.com",
             Questions =
             [
@@ -341,7 +342,7 @@ public class QuizServiceTests
         {
             Id = quizId,
             Title = "Test Quiz",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             CreatedBy = "test@example.com",
             Questions =
             [
@@ -405,7 +406,7 @@ public class QuizServiceTests
         {
             Id = quizId,
             Title = "Empty Quiz",
-            Category = Constants.Category.Art,
+            Category = Data.Constants.Category.Art,
             Questions = new List<Question>(), // No questions
             QuizAttempts = new List<QuizAttempt>(),
             CreatedBy = "test@example.com"

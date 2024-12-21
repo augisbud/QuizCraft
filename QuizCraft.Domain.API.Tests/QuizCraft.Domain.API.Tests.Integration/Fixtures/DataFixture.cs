@@ -1,5 +1,5 @@
-using QuizCraft.Domain.API.Constants;
-using QuizCraft.Domain.API.Entities;
+using QuizCraft.Domain.Data.Constants;
+using QuizCraft.Domain.Data.Entities;
 
 namespace QuizCraft.Domain.API.Tests.Integration.Fixtures;
 

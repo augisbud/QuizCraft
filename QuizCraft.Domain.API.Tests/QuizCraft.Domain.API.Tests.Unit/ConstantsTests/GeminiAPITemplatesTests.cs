@@ -1,6 +1,7 @@
 using Newtonsoft.Json;
-using QuizCraft.Domain.API.Constants;
-using QuizCraft.Domain.API.Models;
+using QuizCraft.Domain.Logic.Constants;
+using QuizCraft.Domain.Data.Models;
+using QuizCraft.Domain.Data.Constants;
 
 namespace QuizCraft.Tests.Domain.API.Constants;
 

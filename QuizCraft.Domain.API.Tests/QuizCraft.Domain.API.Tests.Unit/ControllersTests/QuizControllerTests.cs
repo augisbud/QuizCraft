@@ -2,8 +2,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
 using QuizCraft.Domain.API.Controllers;
-using QuizCraft.Domain.API.Models;
-using QuizCraft.Domain.API.Services;
+using QuizCraft.Domain.Data.Models;
+using QuizCraft.Domain.Logic.Services;
 
 namespace QuizCraft.Domain.API.Tests.Unit.ControllersTests;
 
@@ -62,7 +62,7 @@ public class QuizControllerTests
         var token = "test-token";
         _controller.HttpContext.Request.Headers.Authorization = $"Bearer {token}";
 
-        var quizzes = new List<QuizDto> { new() { Id = Guid.NewGuid(), Title = "Test Quiz", CreatedAt = DateTime.UtcNow, Category = Constants.Category.Art } };
+        var quizzes = new List<QuizDto> { new() { Id = Guid.NewGuid(), Title = "Test Quiz", CreatedAt = DateTime.UtcNow, Category = Data.Constants.Category.Art } };
         _quizService.Setup(x => x.RetrieveQuizzes(It.IsAny<string>())).Returns(quizzes);
 
         // Act

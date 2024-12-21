@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
-using QuizCraft.Domain.API.APIClients;
+using QuizCraft.Domain.Logic.APIClients;
 
 namespace QuizCraft.Domain.API.Tests.Unit.APIClientsTests;
 
